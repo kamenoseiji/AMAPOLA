@@ -354,3 +354,9 @@ def plotQUXY(pp, scanDic):
     pp.close()
     return
 #
+#-------- Tool 
+def get_progressbar_str(progress):
+    MAX_LEN = 48
+    BAR_LEN = int(MAX_LEN * progress)
+    return ('[' + '=' * BAR_LEN + ('>' if BAR_LEN < MAX_LEN else '') + ' ' * (MAX_LEN - BAR_LEN) + '] %.1f%%' % (progress * 100.))
+#

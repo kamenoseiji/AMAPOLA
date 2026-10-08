@@ -1,6 +1,6 @@
 import numpy as np
-from Plotters import plotTsysDic
-from interferometry import GetAntName, GetChNum, GetBandNames, GetTimerecord, GetAzEl, GetTemp, GetPSpecScan, GetPSpec, RADDEG, Tcmb, mjd2utc, indexList, get_progressbar_str
+from Plotters import plotTsysDic, get_progressbar_str
+from interferometry import GetAntName, GetChNum, GetBandNames, GetAzEl, GetTemp, GetPSpecScan, GetPSpec, RADDEG, Tcmb, mjd2utc, indexList
 from atmCal import ATTatm
 from optparse import OptionParser
 parser = OptionParser()

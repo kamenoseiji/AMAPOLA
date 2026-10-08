@@ -1,7 +1,8 @@
 import sys
 import numpy as np
 import scipy
-from interferometry import GetChNum, GetPSpec, GetLoadTemp, GetTimerecord, get_progressbar_str, indexList, Tcmb, mjd2utc
+from interferometry import GetChNum, GetPSpec, GetLoadTemp, GetTimerecord, indexList, Tcmb, mjd2utc
+from Plotters import get_progressbar_str
 from casatools import table as tbtool
 from casatools import msmetadata as msmdtool
 tb = tbtool()

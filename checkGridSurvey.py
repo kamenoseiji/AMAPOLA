@@ -5,7 +5,7 @@ import math
 import numpy as np
 import xml.etree.ElementTree as ET
 from matplotlib.backends.backend_pdf import PdfPages
-from interferometry import GetTemp, Tcmb, kb, BANDPA, BANDFQ, indexList, subArrayIndex, GetAntName, GetAntD, GetSourceDic, GetBandNames, GetAeff, GetDterm, quadratic_interpol, GetAtmSPWs, GetBPcalSPWs, GetSPWFreq, GetOnSource, GetUVW, loadScanSPW, gainComplex, gainComplexErr, gainComplexVec, bestRefant, ANT0, ANT1, Ant2Bl, Ant2BlD, Bl2Ant, CrossPolBL, CrossPolBP, SPWalign, delay_search, linearRegression, VisMuiti_solveD, AllanVarPhase, specBunch
+from interferometry import GetTemp, Tcmb, kb, BANDPA, BANDFQ, indexList, subArrayIndex, GetAntName, GetAntD, GetSourceDic, GetBandNames, GetAeff, GetDterm, quadratic_interpol, GetAtmSPWs, GetBPcalSPWs, GetSPWFreq, GetOnSource, GetUVW, loadScanSPW, gainComplex, gainComplexVec, bestRefant, ANT0, ANT1, Ant2Bl, Ant2BlD, Bl2Ant, CrossPolBL, CrossPolBP, SPWalign, delay_search, linearRegression, VisMuiti_solveD, AllanVarPhase
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ptick
 from Plotters import plotSP, plotXYP, plotBLAV, plotFL, plotQUXY, plotResidualMap
@@ -41,7 +41,7 @@ def GetSSOFlux(StokesDic, timeText, FreqGHz):
         StokesDic[SSO] = [FreqGHz, flux]
         SSODic[SSO]    = [FreqGHz, flux, [major, minor, pa]]
     return StokesDic, SSODic
-SCR_DIR = os.environ['HOME'] + '/ALMA_Py3/'
+SCR_DIR = os.environ['HOME'] + '/AMAPOLA/'
 TBL_DIR = 'https://www.alma.cl/~skameno/AMAPOLA/Table/'
 #-------- Parse options
 parser = OptionParser()
