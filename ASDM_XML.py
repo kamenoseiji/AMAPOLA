@@ -29,3 +29,27 @@ def BandList( prefix ):
     #
     return list(set(RXList))
 #
+def spwMS(msfile):
+    from casatools import msmetadata as msmdtool
+    msmd = msmdtool()
+    msmd.open(msfile)
+    spwList = list(set(msmd.tdmspws()) | set(msmd.fdmspws()))
+    spwList = [int(spw) for spw in spwList if len(msmd.scansforspw(spw)) > 0]
+    spwList.sort()
+    spwDic  = dict(zip(spwList, [[]]*len(spwList))) # Dictionary for spw info
+    for spw in spwDic.keys():
+        chFreq = msmd.chanfreqs(spw)
+        spwDic[spw] = {
+            'Band'   : [spwName.split('ALMA_')[1] for spwName in msmd.namesforspws(spw)[0].split('#') if 'ALMA_' in spwName][0],
+            'BB'     : msmd.baseband(spw),
+            'chNum'  : len(chFreq),
+            'refFreq': msmd.reffreq(spw)['m0']['value'],
+            'BW'     : msmd.bandwidths(spw),
+            'ch0'    : chFreq[0],
+            'chStep' : np.median(msmd.chanwidths(spw)),
+            'refChan': -0.5,
+            'scanList': msmd.scansforspw(spw).tolist()
+        }
+    msmd.close()
+    return spwDic
+#

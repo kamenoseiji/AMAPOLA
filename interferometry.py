@@ -185,6 +185,20 @@ def GetAtmSPWs(msfile):                 # SPWs used in atmCal scan
     msmd.close()
     return atmSPWs
 #
+def GetPHSPWs(msfile):                  # SPWs used in phase calibration scans
+    msmd.open(msfile)
+    phSPWs  = msmd.spwsforintent("CALIBRATE_PHASE*").tolist(); phSPWs.sort()
+    SPWnames= msmd.namesforspws(phSPWs)
+    msmd.close()
+    return [spw for spw_index, spw in enumerate(phSPWs) if 'FULL_RES' in SPWnames[spw_index] ]
+#
+def GetPHchavSPWs(msfile):
+    msmd.open(msfile)
+    phSPWs  = msmd.spwsforintent("CALIBRATE_PHASE*").tolist(); phSPWs.sort()
+    SPWnames= msmd.namesforspws(phSPWs)
+    msmd.close()
+    return [spw for spw_index, spw in enumerate(phSPWs) if 'CH_AVG' in SPWnames[spw_index] ]
+#
 def GetSPWFreq(msfile, SPWdic):         # Frequency setups in SPWs
     msmd.open(msfile)
     TDMspwList = msmd.tdmspws().tolist()
@@ -543,6 +557,10 @@ def InvPAVector(PA, Unity):
         [Zeroty,-1.0j*Unity,1.0j*Unity, Zeroty]])
 #
 #-------- Calibration
+def beamF(disk2FWHMratio):     # diskR / FWHM ratio
+    disk2sigma = disk2FWHMratio * 2.3548200450309493   # FWHM / (2.0* np.sqrt(2.0* log(2.0)))
+    return( 2.0* (1.0 - np.exp(-0.5* (disk2sigma)**2)) / (disk2sigma**2) )
+#
 def gainComplexVec( bl_vis, niter=2 ):      # Solve antenna-based gains using visibilities
     # bl_vis[baseline, channel]
     ChavVis = np.median(bl_vis.real, axis=1) + (0.0+1.0j)*np.median(bl_vis.imag, axis=1)
@@ -595,7 +613,7 @@ def gainComplex( bl_vis, niter=4 ):         # Solve antenna-based gains using vi
 def spec2corr(spec):
     nspec = len(spec)     
     tmpspec = np.append(spec, np.zeros(nspec, dtype=complex))
-    corr = scipy.ifft(tmpspec)
+    corr = scipy.fft.ifft(tmpspec)
     return np.append(corr[nspec:(2*nspec)], corr[:nspec])
 #
 def delay_cal( spec, delay ):
