@@ -18,7 +18,7 @@ AMAPOLA system is composed by two parts; data reduction (this repository) and da
    ```
    this spawns /home/skameno/AMAPOLA/ where all scripts will be stored.
 
-3. Add the directory on the PYTHONPATH environment.
+3. Add the directory on the PYTHONPATH environment in .bashrc:
    ``` .bashrc
    export PYTHONPATH=${PYTHONPATH}:/home/skameno/AMAPOLA/ 
    ```
@@ -34,7 +34,7 @@ AMAPOLA system is composed by two parts; data reduction (this repository) and da
    Note that both ASDM and MS must exist on the same working directory.
 
 ### For multiple ASDMs
- Automated reduction can be performed by a wrapper scripts:
+ Automated reduction can be performed by a wrapper script 'InfLoop.sh'
    ``` InfLoop.sh
    !/usr/bin/bash
    rm -rf uid*
@@ -48,7 +48,7 @@ AMAPOLA system is composed by two parts; data reduction (this repository) and da
         casa -c ~/AMAPOLA/checkUID.py
         sleep 21600
     done
-    ```
+   ```
  This script activates the procedure every 6 hours (21600 seconds). SLTquery.py fetch new ExecBlock records in the shiftlog and records them on UID/UIDList. For this purpose, a subdirectory UID must be created, in advance, undr the working directory. Then, the script checkUID.py runs to download ASDMs, merge multiple EBs with the same array and band combination, executes checkGridSurvey.py, and ingest results on the source catalogue.
  These subdirectories must be created with write permission before running InfLoop.sh:
 - UID/ : to store UIDList and ASDMs
