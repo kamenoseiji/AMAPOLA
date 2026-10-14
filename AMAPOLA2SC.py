@@ -99,7 +99,7 @@ def fluxInterpolate( srcDic, src, refFreq ):
     return np.array([StokesValues,StokesErrors])
 #
 prefix = options.uid.replace("/", "_").replace(":","_").replace(" ","")
-#prefix = 'uid___A002_X13cdcf8_X12478'
+#prefix = 'uid___A002_X141500a_Xb463'
 EB  = prefix.replace("___", "://").replace("_","/")
 ctx = ssl.create_default_context()
 ctx.check_hostname = False
@@ -108,18 +108,16 @@ url = URI_EB + EB
 jdata = urlopen(url, context=ctx).read()
 dataList = json.loads(jdata)
 bandList = list(set([int(data['bandName'].split()[1]) for data in dataList]))
-#
-if len(dataList) == 0:
-    print('%s is not recorded in the source catalogue' % (EB))
-    exit()
-print('%s Band%d in AMAPOLA' % (EB, bandList[0]))
-conn = httplib.HTTPSConnection("sourcecat.osf.alma.cl",context=ssl._create_unverified_context())
-#-------- Load AMAPOLA results
-for band in bandList:
-    AMAPOLA_fileName = '%s-RB_%02d-Flux.log' % (prefix, band)
-    amapolaLOG = urlopen(AMAPOLA_URI + AMAPOLA_fileName).readlines()
-    StokesDic = AMAPOLA_IQUV(amapolaLOG)    
-print('Source       Frequency    I [Jy]         Q [Jy]         U [Jy]         V [Jy]          p [%]           EVPA [deg]')
+#-------- Found EB in the SC
+if len(dataList) > 0:
+    print('%s Band%d in AMAPOLA' % (EB, bandList[0]))
+    conn = httplib.HTTPSConnection("sourcecat.osf.alma.cl",context=ssl._create_unverified_context())
+    #-------- Load AMAPOLA results
+    for band in bandList:
+        AMAPOLA_fileName = '%s-RB_%02d-Flux.log' % (prefix, band)
+        amapolaLOG = urlopen(AMAPOLA_URI + AMAPOLA_fileName).readlines()
+        StokesDic = AMAPOLA_IQUV(amapolaLOG)    
+    print('Source       Frequency    I [Jy]         Q [Jy]         U [Jy]         V [Jy]          p [%]           EVPA [deg]')
 for data in dataList:
     StokesValues = fluxInterpolate( StokesDic, data['names'][0]['name'], 1.0e-9* data['frequency'] )
     I = StokesValues[0,0]
@@ -129,17 +127,20 @@ for data in dataList:
     ePdeg = 100.0*np.sqrt(ePsqr/I**2 + Psqr*StokesValues[1,0]**2/I**4)
     Pang = 90.0* np.arctan2(StokesValues[0,2],StokesValues[0,1])/np.pi
     ePang= 90.0* np.sqrt(StokesValues[0,1]**2 * StokesValues[1,2]**2 + StokesValues[0,2]**2 * StokesValues[1,1]**2) / Psqr / np.pi
+    CPdeg = 100.0* StokesValues[0,3] / I
+    eCPdeg= 100.0* StokesValues[1,3] / I
     print('%s : %.1f GHz : %6.3f (%.3f) %+.3f (%.3f) %+.3f (%.3f) %+.3f (%.3f)  %6.3f (%.3f)  %+7.3f (%.3f)' % (data['names'][0]['name'], 1.0e-9* data['frequency'],
         StokesValues[0,0], StokesValues[1,0],
         StokesValues[0,1], StokesValues[1,1],
         StokesValues[0,2], StokesValues[1,2],
         StokesValues[0,3], StokesValues[1,3],
         Pdeg, ePdeg,
-        Pang, ePang))
+        Pang, ePang,
+        CPdeg,eCPdeg))
     #---- Check consistency in Stokes I
     if abs(StokesValues[0,0] - data['flux']) > 0.2* data['flux']: continue  # Filter >20% discrepancy out
     #---- Post polarization data to SC
-    urlPart = '/sc/rest/measurements/%d/update?degree=%.3f&degreeUncertainty=%.3f&angle=%.3f&angleUncertainty=%.3f' % (data['id'], Pdeg, ePdeg, Pang, ePang)
+    urlPart = '/sc/rest/measurements/%d/update?degree=%.3f&degreeUncertainty=%.3f&angle=%.3f&angleUncertainty=%.3f&polFractionCircular=%.3f&polFractionCircularUncertainty=%.3f' % (data['id'], Pdeg, ePdeg, Pang, ePang, CPdeg, eCPdeg)
     if DRYRUN: continue
     conn.putrequest('POST', urlPart);
     conn.putheader('Authorization', 'Basic %s' % (UserPass))
@@ -153,4 +154,7 @@ for data in dataList:
             print('Faild to ingest : %s' % (urlPart))
     else:
         print('Faild to ingest : %s' % (urlPart))
+#-------- EB is not registered in the SC
+else:
+    print('%s is not recorded in the source catalogue' % (EB))
 #
