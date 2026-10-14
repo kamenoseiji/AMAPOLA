@@ -135,8 +135,7 @@ for data in dataList:
         StokesValues[0,2], StokesValues[1,2],
         StokesValues[0,3], StokesValues[1,3],
         Pdeg, ePdeg,
-        Pang, ePang,
-        CPdeg,eCPdeg))
+        Pang, ePang))
     #---- Check consistency in Stokes I
     if abs(StokesValues[0,0] - data['flux']) > 0.2* data['flux']: continue  # Filter >20% discrepancy out
     #---- Post polarization data to SC
