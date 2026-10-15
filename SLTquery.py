@@ -9,17 +9,20 @@ parser.add_option('-b', dest='Subject', metavar='Subject',
     help='Subject  e.g. baseline', default='')
 parser.add_option('-n', dest='ProjectName', metavar='ProjectName',
     help='ProjectName  e.g. Per Source Grid Monitoring', default='')
-parser.add_option('-d', dest='days', metavar='days',
+parser.add_option('-d', dest='backdays', metavar='backdays',
     help='Backword days', default='4')
+parser.add_option('-f', dest='forwarddays', metavar='forwarddays',
+    help='Forward days', default='0')
 (options, args) = parser.parse_args()
-backDays=  int(options.days)
+backDays=  int(options.backdays)
+forwardDays=  int(options.forwarddays)
 UserPass = os.getenv('b64credentials', '')   # Authorization Basic Base64
 if UserPass == '':
     print('Set b64credentials as an environmental variable')
     exit()
 SLT_URI  = 'https://asa.alma.cl/webslt/service/api/entries?'
-ST = list(range(0, backDays, 100))
-ET = [st-1 for st in ST[1:]] + [backDays]
+ST = list(range(forwardDays, backDays, 100))
+ET = [st for st in ST[1:]] + [backDays]
 for term_index, term in enumerate(ET):
     SLTstart = (datetime.datetime.today() - datetime.timedelta(days=term) - datetime.timedelta(hours=4)).strftime('%Y-%m-%dT%H:%M:%S')
     SLTend   = (datetime.datetime.today() - datetime.timedelta(days=ST[term_index]) - datetime.timedelta(hours=2)).strftime('%Y-%m-%dT%H:%M:%S')
