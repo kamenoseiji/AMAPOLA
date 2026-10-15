@@ -195,7 +195,8 @@ def applyTsysCal(prefix, BandName, BandbpSPW, scanDic, SSODic, XspecList):
             Tant = StokesI* nominalAe* np.pi* antDia**2 / (8.0* kb)                     # Antenna temperature of SSO
             #-------- Interpolated optical depth in the scan
             Tau0SP = np.outer(Tau0List[spw_index], np.ones(len(scanDic[scan]['mjdSec'])))
-            if np.max(atmSecZ) - np.min(atmSecZ) > 0.1: Tau0SP += scipy.interpolate.splev(scanDic[scan]['mjdSec'], SPList[spw_index])
+            #if np.max(atmSecZ) - np.min(atmSecZ) > 0.1: Tau0SP += scipy.interpolate.splev(scanDic[scan]['mjdSec'], SPList[spw_index])
+            if np.max(atmSecZ) - np.min(atmSecZ) > 0.1: Tau0SP += SPList[spw_index](scanDic[scan]['mjdSec'])
             secZ = 1.0 / np.sin(scanDic[scan]['EL'])                           # Airmass
             scanTau = scanTau + [Tau0SP * secZ]             # Optical depth at the elevation
             exp_Tau = np.exp(-scanTau[spw_index])           # Atmospheric attenuation
@@ -370,16 +371,7 @@ def lmStokes(StokesVis, uvDist):
     return StokesFlux, StokesSlope, StokesErr
 #-------- Smooth time-variable Tau
 def tauSMTH( timeSample, TauE ):
-    if len(timeSample) > 5:
-        SplineWeight = np.ones(len(timeSample) + 8)
-        flagIndex = (np.where(abs(TauE - np.median(TauE))/np.std(TauE) > 3.0)[0] + 2).tolist()
-        SplineWeight[flagIndex] = 0.1
-        tempTime = np.append([timeSample[0]-100.0, timeSample[0]-20.0, timeSample[0]-10.0], np.append(timeSample, [timeSample[-1]+10.0, timeSample[-1]+20.0, timeSample[-1]+100.0, timeSample[-1]+200.0, timeSample[-1]+300.0]))
-        tempTauE = np.append([TauE[0], TauE[0], TauE[0]], np.append(TauE, [TauE[-1], TauE[-1], TauE[-1], TauE[-1], TauE[-1]]))
-        smthTau = scipy.interpolate.splrep(tempTime, tempTauE, k=3, w=SplineWeight, t=timeSample[1:-1])
-    else:
-        tempTime = np.arange(np.min(timeSample) - 3600.0,  np.max(timeSample) + 3600.0, 300.0)
-        tempTauE = np.repeat(np.median(TauE), len(tempTime))
-        smthTau = scipy.interpolate.splrep(tempTime, tempTauE, k=3)
-    return smthTau
-#
+    if len(timeSample) < 5:
+        timeSample = np.array( [timeSample[0]-100, timeSample[0]-50] + timeSample.tolist() + [timeSample[-1] + 50, timeSample[-1] + 100])
+        TauE = np.array( [TauE[0], TauE[0]] + TauE.tolist() + [TauE[-1], TauE[-1]])
+    return scipy.interpolate.PchipInterpolator(timeSample, TauE)
