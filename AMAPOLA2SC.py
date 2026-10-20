@@ -31,7 +31,7 @@ parser.add_option('-d', '--dry',  dest='dryrun', metavar='dryrun', help='Dry run
 AMAPOLA_PATH = '/users/skameno/ALMAR/WORK/'
 AMAPOLA_URI = 'https://www.alma.cl/~skameno/Grid/Stokes/'
 SC_URI = 'https://sourcecat.osf.alma.cl/sc/rest/'
-URI_EB = SC_URI + 'measurements?limit=256&execblockUid='
+URI_EB = SC_URI + 'measurements?limit=1000&catalogue=5&execblockUid='
 UserPass = os.getenv('b64credentials', '')  # Authorization Basic Base64
 if len(UserPass) < 8:                       # Check Authorization
     print('Set Base64 Credential to the environmental variable \'b64credentials\'\n')
@@ -104,7 +104,7 @@ EB  = prefix.replace("___", "://").replace("_","/")
 ctx = ssl.create_default_context()
 ctx.check_hostname = False
 ctx.verify_mode = ssl.CERT_NONE
-url = URI_EB + EB
+url = URI_EB + EB + '&searchOnDate=true&dateCriteria=1&date=2000-01-01&onlyValid=false'
 jdata = urlopen(url, context=ctx).read()
 dataList = json.loads(jdata)
 bandList = list(set([int(data['bandName'].split()[1]) for data in dataList]))
