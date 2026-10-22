@@ -35,7 +35,8 @@ for FS in FSUIDs:
                 importasdm(prefix)
         #-------- Classification by band
         bandEB = [np.unique(GetBandNames(prefix + '.ms')).tolist() for prefix in EBList]
-        bandList = np.unique(np.array(bandEB)).tolist()
+        #bandList = np.unique(np.array(bandEB)).tolist()
+        bandList = np.unique(np.array([band for bands in bandEB for band in bands])).tolist()
         #-------- Check Number of Antennas in the array
         antList = GetAntName(prefix + '.ms')
         if len(antList) < 4: 

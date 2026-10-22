@@ -39,7 +39,7 @@ def parseSLT(query):
 #
 #-------- For single ExecBlock
 if options.EBuid   != '':
-    queryText = 'curl -H\"Authorization: Basic %s\" \'%sexecBlockUID=%s' % (UserPass, options.EBuid.replace('___','://').replace('_','/'))
+    queryText = 'curl -H\"Authorization: Basic %s\" \'%sexecBlockUID=%s' % (UserPass, SLT_URI, options.EBuid.replace('___','://').replace('_','/'))
     SLTlist = parseSLT(queryText)
 else:
     ST = list(range(forwardDays, backDays, 100))
@@ -55,16 +55,3 @@ else:
         SLTlist = SLTlist + parseSLT(queryText)
     #
 for SLTentry in SLTlist: print(SLTentry)
-#    queryText = queryText + '\' > SLT.log'
-#    #print(queryText)
-#    os.system(queryText)
-#    fp = open('SLT.log', 'r')
-#    SLTline = fp.readlines()
-#    fp.close()
-#    SLTentries = SLTline[0].split('\"')
-#    UIDList = [SLTentries[index+2] for index, SLTentry in enumerate(SLTentries) if 'execBlockUid' in SLTentry]
-#    arrayNameList = [SLTentries[index+2] for index, SLTentry in enumerate(SLTentries) if 'arrayName' in SLTentry]
-#    startTimeList = [SLTentries[index+2] for index, SLTentry in enumerate(SLTentries) if 'start' in SLTentry]
-#    endTimeList   = [SLTentries[index+2] for index, SLTentry in enumerate(SLTentries) if 'end' in SLTentry]
-#    SBnameList   = [SLTentries[index+2] for index, SLTentry in enumerate(SLTentries) if 'schedBlockCode' in SLTentry]
-#    for index, UID in enumerate(UIDList): print('new %s %s %s %s %s' % (UID, arrayNameList[index], startTimeList[index], endTimeList[index], SBnameList[index]))

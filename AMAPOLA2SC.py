@@ -30,7 +30,8 @@ parser.add_option('-d', '--dry',  dest='dryrun', metavar='dryrun', help='Dry run
 (options, args) = parser.parse_args()
 AMAPOLA_PATH = '/users/skameno/ALMAR/WORK/'
 AMAPOLA_URI = 'https://www.alma.cl/~skameno/Grid/Stokes/'
-SC_URI = 'https://sourcecat.osf.alma.cl/sc/rest/'
+#SC_URI = 'https://sourcecat.osf.alma.cl/sc/rest/'
+SC_URI = 'https://asa.alma.cl/sc/rest/'
 URI_EB = SC_URI + 'measurements?limit=1000&catalogue=5&execblockUid='
 UserPass = os.getenv('b64credentials', '')  # Authorization Basic Base64
 if len(UserPass) < 8:                       # Check Authorization
