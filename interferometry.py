@@ -21,7 +21,9 @@ MJD_EPOCH = datetime.datetime(1858, 11, 17, 0, 0, 0, tzinfo=datetime.timezone.ut
 ALMA_long= -67.755/180.0* np.pi     # ALMA AOS Longitude
 ALMA_lat = -23.029/180.0* np.pi     # ALMA AOS Latitude
 BANDPA = [0.0, 45.0, -45.0, 80.0, -80.0, 45.0, -45.0, 36.45, 90.0, -90.0, 0.0]   # X-pol orientation for Band-1, 2, 3, 4, 5, 6, 7, 8, 9, and 10
-BANDFQ = [0.0, 43.2, 75.0, 97.5, 132.0, 183.0, 233.0, 343.5, 460.0, 650.0, 870.0]   # Standard frequency [GHz]
+BANDFQ = [0.0, 40.0, 75.0, 97.5, 154.9, 183.0, 233.0, 343.5, 460.0, 650.0, 870.0]   # Standard frequency [GHz]
+BANDFQL= [0.0, 35.0, 67.0, 84.0, 125.0, 158.0, 211.0, 275.0, 385.0, 602.0, 787.0]   # Band lower limit [GHz]
+BANDFQU= [35.0,50.0, 84.0,116.0, 158.0, 211.0, 275.0, 373.0, 500.0, 720.0, 950.0]   # Band upper limit [GHz] but Band-2 and 4 were modified to avoid overlap
 #-------- Indexing
 KERNEL_BL = (np.arange(64)*np.arange(1,65)/2).astype(int)
 def Bl2Ant(bl_index):     # Baseline -> antenna indexing (canonical ordering)
@@ -154,8 +156,11 @@ def GetBandNames(msfile, atmSPWs=[]):       # Receiver band name
     if len(atmSPWs) < 1: atmSPWs = GetAtmSPWs(msfile)
     msmd.open(msfile)
     atmspwNames = msmd.namesforspws(atmSPWs)
-    atmBandNames, atmPattern = [], r'RB_..'
-    for spwName in atmspwNames : atmBandNames = atmBandNames + re.findall(atmPattern, spwName)
+    atmBandNames = [re.findall(r'RB_..', spwName)[0] for spwName in atmspwNames if 'RB_' in spwName]
+    if len(atmBandNames) < len(atmSPWs):                # spwName is blank in early observations, then guess band name by observing frequency
+        tb.open(msfile + '/' + 'SPECTRAL_WINDOW')
+        spwFreqList = [1.0e-9* np.median(tb.getcell("CHAN_FREQ", spwID)) for spwID in atmSPWs]
+        atmBandNames = ['RB_%02d' % [band_index for band_index,freq in enumerate(BANDFQL) if spwFreq > freq and spwFreq < BANDFQU[band_index]][0] for spwFreq in spwFreqList]
     msmd.close(); msmd.done()
     return atmBandNames 
 #  

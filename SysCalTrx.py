@@ -44,6 +44,7 @@ chavspwList = list((set(msmd.almaspws(chavg=True)) - set(msmd.almaspws(sqld=True
 OnScanList  = list((set(msmd.scansforintent('*ON_SOURCE')) - set(msmd.scansforintent('*ATMOSPHERE*'))) & set(msmd.scansforspw(chavspwList[0])))
 onTimeList = [np.median(msmd.timesforscan(scan)) for scan in OnScanList]
 msmd.close()
+chavspwList.sort()
 OnScanList.sort()
 BandNames = GetBandNames(msfile, spwList); UniqBands = list(set(BandNames))
 NumBands = len(UniqBands)
