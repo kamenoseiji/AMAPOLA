@@ -202,8 +202,12 @@ def GetPHchavSPWs(msfile):
     msmd.open(msfile)
     phSPWs  = msmd.spwsforintent("CALIBRATE_PHASE*").tolist(); phSPWs.sort()
     SPWnames= msmd.namesforspws(phSPWs)
+    chavSPWList = [spw for spw_index, spw in enumerate(phSPWs) if 'CH_AVG' in SPWnames[spw_index] ]
+    if len(chavSPWList) == 0:
+        tb.open(msfile + '/' + 'SPECTRAL_WINDOW')
+        chavSPWList = [spw for spw in phSPWs if tb.getcell("NUM_CHAN", spw) == 1 and tb.getcell("RESOLUTION", spw)[0] > 1.5e9 and tb.getcell("RESOLUTION", spw)[0] < 2.0e9]
     msmd.close()
-    return [spw for spw_index, spw in enumerate(phSPWs) if 'CH_AVG' in SPWnames[spw_index] ]
+    return chavSPWList
 #
 def GetSPWFreq(msfile, SPWdic):         # Frequency setups in SPWs
     msmd.open(msfile)

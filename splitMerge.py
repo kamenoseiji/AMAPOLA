@@ -8,7 +8,9 @@ parser.add_option('-u', dest='prefixList', metavar='prefixList',
     help='EB UID   e.g. uid___A002_X1399105_X40ca,uid___A002_X1399105_X414b,uid___A002_X1399105_X41c8', default='')
 (options, args) = parser.parse_args()
 prefixList = [prefix.replace("/", "_").replace(":","_") for prefix in options.prefixList.split(',')]
-#prefixList = ['uid___A002_X1399105_X40ca','uid___A002_X1399105_X414b','uid___A002_X1399105_X41c8']
+'''
+prefixList = ['uid___A002_X3f6a86_X111','uid___A002_X3f6a86_X310']
+'''
 prefixElement = prefixList[0].split('_X'); newPrefix = prefixElement[0] + '_X' + prefixElement[1]
 os.system('rm -rf %s.ms*' % (newPrefix))
 comvis = []
@@ -17,6 +19,8 @@ for file_index, prefix in enumerate(prefixList):
     if not os.path.isdir(msfile): importasdm(prefix)
     SPWdic = spwMS(msfile)
     fullResSPWs = GetPHSPWs(msfile)
+    if len(fullResSPWs) == 0:
+        fullResSPWs = [spw for spw in SPWdic.keys() if SPWdic[spw]['chNum'] >= 8]
     chavSPWs    = GetPHchavSPWs(msfile)
     bandList = list(set([SPWdic[spw]['Band'] for spw in SPWdic.keys()]))
     for band in bandList:

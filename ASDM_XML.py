@@ -1,9 +1,8 @@
 # Module to read XML file in prefix
-#
 import os
 import xml.etree.ElementTree as ET
 import numpy as np
-from interferometry import indexList
+from interferometry import indexList, GetBandNames
 def CheckCorr( prefix ):
     if not os.path.isdir(prefix): return 'ALMA_BASELINE'  # Default BLCORR
     Corr_XML = prefix + '/CorrelatorMode.xml'
@@ -35,12 +34,14 @@ def spwMS(msfile):
     msmd.open(msfile)
     spwList = list(set(msmd.tdmspws()) | set(msmd.fdmspws()))
     spwList = [int(spw) for spw in spwList if len(msmd.scansforspw(spw)) > 0]
+    spwList = [int(spw) for spw in spwList if len(msmd.chanfreqs(spw)) > 8]
     spwList.sort()
     spwDic  = dict(zip(spwList, [[]]*len(spwList))) # Dictionary for spw info
     for spw in spwDic.keys():
         chFreq = msmd.chanfreqs(spw)
         spwDic[spw] = {
-            'Band'   : [spwName.split('ALMA_')[1] for spwName in msmd.namesforspws(spw)[0].split('#') if 'ALMA_' in spwName][0],
+            #'Band'   : [spwName.split('ALMA_')[1] for spwName in msmd.namesforspws(spw)[0].split('#') if 'ALMA_' in spwName][0],
+            'Band'   : GetBandNames(msfile,  [spw])[0],
             'BB'     : msmd.baseband(spw),
             'chNum'  : len(chFreq),
             'refFreq': msmd.reffreq(spw)['m0']['value'],
