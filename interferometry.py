@@ -160,6 +160,7 @@ def GetBandNames(msfile, atmSPWs=[]):       # Receiver band name
     if len(atmBandNames) < len(atmSPWs):                # spwName is blank in early observations, then guess band name by observing frequency
         tb.open(msfile + '/' + 'SPECTRAL_WINDOW')
         spwFreqList = [1.0e-9* np.median(tb.getcell("CHAN_FREQ", spwID)) for spwID in atmSPWs]
+        tb.close()
         atmBandNames = ['RB_%02d' % [band_index for band_index,freq in enumerate(BANDFQL) if spwFreq > freq and spwFreq < BANDFQU[band_index]][0] for spwFreq in spwFreqList]
     msmd.close(); msmd.done()
     return atmBandNames 

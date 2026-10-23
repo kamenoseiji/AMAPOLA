@@ -44,7 +44,6 @@ def GetSSOFlux(StokesDic, timeText, FreqGHz):
 SCR_DIR = os.environ['HOME'] + '/AMAPOLA/'
 TBL_DIR = 'https://www.alma.cl/~skameno/AMAPOLA/Table/'
 #-------- Parse options
-'''
 parser = OptionParser()
 parser.add_option('-u',  dest='uid', metavar='uid', help='UID to reduce e.g. uid___A002_X10ded83_Xa91e', default='')
 parser.add_option('-a',  dest='antFlag', metavar='antFlag', help='Antennas to flag out', default='')
@@ -81,6 +80,7 @@ TsysDigitalCorrection = False
 PLOTMAP = False
 PLOTFL = False
 PLOTQU = False
+'''
 msfile = prefix + '.ms'
 tempAtm = GetTemp(msfile)
 if tempAtm != tempAtm: tempAtm = 270.0; print('Cannot get ambient-load temperature ... employ 270.0 K, instead.')
@@ -90,6 +90,7 @@ os.system('casa --nologger --agg -c ' + SCR_DIR + 'SysCalTrx.py -u %s' % (prefix
 TrxFileList = glob.glob(prefix + '*Trx.npy'); TrxFileList.sort()
 RXList = list(set( [TrxFile.split('-')[1] for TrxFile in TrxFileList] ))
 BandName = RXList[0]
+if BandName not in ['RB_01', 'RB_02', 'RB_03', 'RB_04', 'RB_06', 'RB_07']: msmd.close(); exit()
 #-------- Check Correlator Type
 BLCORR = True
 if 'ACA' in CheckCorr(prefix): BLCORR = False
@@ -107,9 +108,7 @@ bpSPWs = GetBPcalSPWs(msfile)
 OnScanList = GetOnSource(msfile)
 if len(OnScanList) == 0: RXList = []
 #-------- 
-msmd.open(msfile)
-spwNames = msmd.namesforspws(bpSPWs)
-if BandName not in ['RB_01', 'RB_02', 'RB_03', 'RB_04', 'RB_06', 'RB_07']: msmd.close(); exit()
+spwNames = GetBandNames(msfile, bpSPWs)
 #-------- Prepare log files
 logfile = open(prefix + '-' + BandName + '-Flux.log', 'w')
 text_corr = ' %s BLCORR' % (prefix) if BLCORR else ' %s ACACORR' % (prefix)
@@ -120,6 +119,7 @@ BandPA = (BANDPA[int(BandName[3:5])] + 90.0)*math.pi/180.0
 BandbpSPW = {'spw': [spw for spw_index,spw in enumerate(bpSPWs) if BandName in spwNames[spw_index]]}
 BandatmSPW= {'spw': [int(TrxFile.split('SPW')[1].split('.')[0]) for TrxFile in TrxFileList if BandName in TrxFile] }
 BandatmSPW['spw'].sort()
+msmd.open(msfile)
 BandScanList = list(set(msmd.scansforspw(BandbpSPW['spw'][0])) & set(OnScanList))
 BandScanList.sort()
 BandbpSPW = GetSPWFreq(msfile, BandbpSPW)   # BandbpSPW : [[SPW List][freqArray][chNum][BW]]
