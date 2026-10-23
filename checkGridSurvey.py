@@ -70,7 +70,7 @@ PLOTQU  = PLOTMAP
 TsysDigitalCorrection = options.TsysDigital
 if options.XYsign != '': givenXYsign  = np.sign(int(options.XYsign))
 '''
-prefix = 'uid___A002_X369097_Xe8d'
+prefix = 'uid___A002_X3f6a86_X111'
 antFlag = []
 uvLimit = 5000
 refant  = ''
@@ -261,6 +261,7 @@ text_sd = '        coherence loss % :'
 for antName in antList[antMap]: text_sd = text_sd + ' ' +  antName
 print(text_sd)
 for scan_index, scan in enumerate(BandScanList):
+    #if scanDic[scan]['source'] in SSOCatalog: continue
     text_sd = '----- Scan%3d %10s :' % (scan, scanDic[scan]['source'])
     chAvgList = []
     for spw_index, spw in enumerate(BandbpSPW['spw']):
@@ -272,8 +273,14 @@ for scan_index, scan in enumerate(BandScanList):
     #-------- Filter outliners out
     scanGain = np.zeros([BP_ant.shape[0], chAvgVis.shape[0]], dtype=complex)
     bl_vis = np.mean(np.array(chAvgList), axis=0).T
-    #outLierVis = np.where(abs(bl_vis) > 10.0* np.median(abs(bl_vis)))
     outLierVis = np.where(abs(bl_vis) > 10.0* np.percentile(abs(np.mean(bl_vis, axis=1)), 80))
+    outLierBl = np.unique(outLierVis[0])
+    if len(outLierBl) < 0.5*blNum: 
+        flaggedAntList = list(set(sum([list(Bl2Ant(bl)) for bl in outLierBl], []))) 
+        scanDic[scan]['scanAnt'] = list(set(range(scanGain.shape[0])) - set(flaggedAntList))
+        unflaggedBlList = list(set(range(bl_vis.shape[0])) - set(outLierBl))
+        unflaggedbl_vis = bl_vis[unflaggedBlList,:]
+        outLierVis = np.where(abs(unflaggedbl_vis) > 10.0* np.percentile(abs(np.mean(unflaggedbl_vis, axis=1)), 80))
     scanFlag = list(set(range(bl_vis.shape[1])) - set(np.unique(outLierVis[1]))); scanFlag.sort()
     if len(scanFlag) > 1:
         scanGain[:,scanFlag] = np.apply_along_axis(gainComplex, 0, bl_vis[:,scanFlag])
