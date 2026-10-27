@@ -44,6 +44,7 @@ def GetSSOFlux(StokesDic, timeText, FreqGHz):
 SCR_DIR = os.environ['HOME'] + '/AMAPOLA/'
 TBL_DIR = 'https://www.alma.cl/~skameno/AMAPOLA/Table/'
 #-------- Parse options
+'''
 parser = OptionParser()
 parser.add_option('-u',  dest='uid', metavar='uid', help='UID to reduce e.g. uid___A002_X10ded83_Xa91e', default='')
 parser.add_option('-a',  dest='antFlag', metavar='antFlag', help='Antennas to flag out', default='')
@@ -70,7 +71,7 @@ PLOTQU  = PLOTMAP
 TsysDigitalCorrection = options.TsysDigital
 if options.XYsign != '': givenXYsign  = np.sign(int(options.XYsign))
 '''
-prefix = 'uid___A002_X3f6a86_X111'
+prefix = 'uid___A002_X1423829_X6ef'
 antFlag = []
 uvLimit = 5000
 refant  = ''
@@ -80,7 +81,6 @@ TsysDigitalCorrection = False
 PLOTMAP = False
 PLOTFL = False
 PLOTQU = False
-'''
 msfile = prefix + '.ms'
 tempAtm = GetTemp(msfile)
 if tempAtm != tempAtm: tempAtm = 270.0; print('Cannot get ambient-load temperature ... employ 270.0 K, instead.')
