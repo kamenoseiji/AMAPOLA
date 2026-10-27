@@ -9,7 +9,7 @@ parser.add_option('-u', dest='prefixList', metavar='prefixList',
 (options, args) = parser.parse_args()
 prefixList = [prefix.replace("/", "_").replace(":","_") for prefix in options.prefixList.split(',')]
 '''
-prefixList = ['uid___A002_X3f6a86_X111','uid___A002_X3f6a86_X310']
+prefixList = ['uid___A002_X1422790_X4c8e','uid___A002_X1422790_X4f73']
 '''
 prefixElement = prefixList[0].split('_X'); newPrefix = prefixElement[0] + '_X' + prefixElement[1]
 os.system('rm -rf %s.ms*' % (newPrefix))

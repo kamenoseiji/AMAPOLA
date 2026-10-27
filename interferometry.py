@@ -192,8 +192,8 @@ def GetAtmSPWs(msfile):                 # SPWs used in atmCal scan
     return atmSPWs
 #
 def GetPHSPWs(msfile):                  # SPWs used in phase calibration scans
+    phSPWs = GetBPcalSPWs(msfile)
     msmd.open(msfile)
-    phSPWs  = msmd.spwsforintent("CALIBRATE_PHASE*").tolist(); phSPWs.sort()
     SPWnames= msmd.namesforspws(phSPWs)
     msmd.close()
     return [spw for spw_index, spw in enumerate(phSPWs) if 'FULL_RES' in SPWnames[spw_index] ]
@@ -201,6 +201,8 @@ def GetPHSPWs(msfile):                  # SPWs used in phase calibration scans
 def GetPHchavSPWs(msfile):
     msmd.open(msfile)
     phSPWs  = msmd.spwsforintent("CALIBRATE_PHASE*").tolist(); phSPWs.sort()
+    if len(phSPWs) < 1: phSPWs = msmd.spwsforintent("CALIBRATE_BANDPASS*").tolist(); phSPWs.sort()
+    if len(phSPWs) < 1: phSPWs = msmd.spwsforintent("CALIBRATE_CHECK*").tolist(); phSPWs.sort()
     SPWnames= msmd.namesforspws(phSPWs)
     chavSPWList = [spw for spw_index, spw in enumerate(phSPWs) if 'CH_AVG' in SPWnames[spw_index] ]
     if len(chavSPWList) == 0:
