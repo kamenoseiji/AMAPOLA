@@ -68,7 +68,7 @@ PLOTMAP = options.Map
 PLOTFL  = PLOTMAP
 PLOTQU  = PLOTMAP
 TsysDigitalCorrection = options.TsysDigital
-if options.XYsign != '': givenXYsign  = np.sign(int(options.XYsign))
+if options.XYsign != '': givenXYsign  = [np.sign(int(XY)) for XY in options.XYsign.split(',')]
 '''
 prefix = 'uid___A002_X1422790_X4c8e'
 antFlag = []
@@ -375,7 +375,7 @@ for spw_index, spw in enumerate(BandbpSPW['spw']):
         BPCaledXspec = Xspec / (BP_ant[polYindex][:,:,ant0]* BP_ant[polXindex][:,:,ant1].conjugate())
         BPCaledXY   += scanDic[scan]['UCmQS'][spw_index]* (np.mean(BPCaledXspec[1][chRange]) +  np.mean(BPCaledXspec[2][chRange].conjugate()))
     XYphase = np.angle(BPCaledXY)
-    XYsign = np.sign(BPCaledXY.real) if 'givenXYsign' not in locals() else np.sign(givenXYsign)
+    XYsign = np.sign(BPCaledXY.real) if 'givenXYsign' not in locals() else np.sign(givenXYsign[spw_index])
     text_sd = 'SPW[%d] : XY phase = %6.1f [deg] sign = %3.0f' % (spw, 180.0*XYphase/np.pi, XYsign)
     logfile.write('# ' + text_sd +'\n'); print(text_sd)
     BPSPWList[spw_index][:,1] *= XYsign
