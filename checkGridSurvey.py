@@ -44,7 +44,6 @@ def GetSSOFlux(StokesDic, timeText, FreqGHz):
 SCR_DIR = os.environ['HOME'] + '/AMAPOLA/'
 TBL_DIR = 'https://www.alma.cl/~skameno/AMAPOLA/Table/'
 #-------- Parse options
-'''
 parser = OptionParser()
 parser.add_option('-u',  dest='uid', metavar='uid', help='UID to reduce e.g. uid___A002_X10ded83_Xa91e', default='')
 parser.add_option('-a',  dest='antFlag', metavar='antFlag', help='Antennas to flag out', default='')
@@ -71,7 +70,7 @@ PLOTQU  = PLOTMAP
 TsysDigitalCorrection = options.TsysDigital
 if options.XYsign != '': givenXYsign  = np.sign(int(options.XYsign))
 '''
-prefix = 'uid___A002_X1423829_X6ef'
+prefix = 'uid___A002_X1422790_X4c8e'
 antFlag = []
 uvLimit = 5000
 refant  = ''
@@ -81,6 +80,7 @@ TsysDigitalCorrection = False
 PLOTMAP = False
 PLOTFL = False
 PLOTQU = False
+'''
 msfile = prefix + '.ms'
 tempAtm = GetTemp(msfile)
 if tempAtm != tempAtm: tempAtm = 270.0; print('Cannot get ambient-load temperature ... employ 270.0 K, instead.')
@@ -340,7 +340,8 @@ for spw_index, spw in enumerate(BandbpSPW['spw']):
     XY = 0.0* refXYspec
     BP = 0.0* scanDic[XYrefscan]['BP'][spw_index]
     for scan_index, scan in enumerate(BPavgScanList):
-        if scanDic[scan]['XYsnr'][spw_index] < 1.0: continue
+        #if scanDic[scan]['XYsnr'][spw_index] < 1.0: continue
+        if scanDic[scan]['XYsnr'][spw_index] < 1.0: scanDic[scan]['XYsnr'][spw_index] *= 0.01
         XYspec = scanDic[scan]['XY'][spw_index]
         XYcorr = XYspec[chRange].dot(refXYspec[chRange].conjugate())
         XY = XY + abs(XYcorr)* np.sign(XYcorr.real)* XYspec
