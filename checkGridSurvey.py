@@ -70,8 +70,8 @@ PLOTQU  = PLOTMAP
 TsysDigitalCorrection = options.TsysDigital
 if options.XYsign != '': givenXYsign  = [np.sign(int(XY)) for XY in options.XYsign.split(',')]
 '''
-prefix = 'uid___A002_X1423829_X4474'
-antFlag = []
+prefix = 'uid___A002_X1423829_X8eda'
+antFlag = ['CM02']
 uvLimit = 5000
 refant  = ''
 BPscan  = 0
@@ -186,7 +186,7 @@ StokesDic = GetAMAPOLAStokes(SCR_DIR, sourceList, qa.time('%fs' % (timeStampList
 StokesDic, SSODic = GetSSOFlux(StokesDic, qa.time('%fs' % (timeStampList[0][0]), form='ymd')[0], [1.0e-9* np.median(BandbpSPW['freq'][spw_index]) for spw_index, spw in enumerate(BandbpSPW['spw'])])   # SSODic[SSO] : [[frequencies for spw], [flux for spw], [maxsize(rad), minsize(rad), pa]]
 #-------- Load Visibilities into memory
 timeStampList, XspecList = loadScanSPW(msfile, BandbpSPW['spw'], BandScanList)  # XspecList[spw][scan] [corr, ch, bl, time]
-outlierScans = [scan for scan_index, scan in enumerate(BandScanList) if len([spw for spw_index, spw in enumerate(BandbpSPW['spw']) if np.percentile(np.median(abs(XspecList[spw_index][scan_index]), axis=1), 99) > 0.99]) > 0]  # filter anomalous cross correlations
+outlierScans = [scan for scan_index, scan in enumerate(BandScanList) if len([spw for spw_index, spw in enumerate(BandbpSPW['spw']) if np.percentile(np.median(abs(XspecList[spw_index][scan_index][:,:,useBlMap]), axis=1), 99) > 0.99]) > 0]  # filter anomalous cross correlations
 for spw_index, spw in enumerate(BandbpSPW['spw']):
     for scan_index, scan in enumerate(BandScanList):
         if scan in outlierScans: XspecList[spw_index].pop(scan_index)
