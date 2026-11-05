@@ -70,8 +70,8 @@ PLOTQU  = PLOTMAP
 TsysDigitalCorrection = options.TsysDigital
 if options.XYsign != '': givenXYsign  = [np.sign(int(XY)) for XY in options.XYsign.split(',')]
 '''
-prefix = 'uid___A002_X1423829_X8eda'
-antFlag = ['CM02']
+prefix = 'uid___A002_Xc3a8fe_X4b08.split.RB_03'
+antFlag = []
 uvLimit = 5000
 refant  = ''
 BPscan  = 0

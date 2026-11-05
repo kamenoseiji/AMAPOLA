@@ -12,7 +12,7 @@ parser.add_option('-t', dest='PLOTTSYS', metavar='PLOTTSYS',
 prefix  = options.prefix.replace("/", "_").replace(":","_").replace(" ","")
 PLOTTSYS= options.PLOTTSYS
 '''
-prefix = 'uid___A002_X102faf1_Xe5d'
+prefix = 'uid___A002_Xc3a8fe_X4b08.split.RB_03'
 PLOTTSYS = True
 '''
 #-------- Read SYSCAL table
@@ -21,7 +21,6 @@ tb.open(msfile + '/SYSCAL')
 colnameList = tb.colnames()
 timeStamp = tb.getcol('TIME')
 tempAtm = GetTemp(msfile)
-#timeSyscalList = timeStamp[ np.where(np.diff(timeStamp) != 0.0)[0].tolist() + [-1] ]
 timeSyscalList = np.unique(timeStamp)
 antID = tb.getcol('ANTENNA_ID')
 spwID = tb.getcol('SPECTRAL_WINDOW_ID')
@@ -38,7 +37,6 @@ antNum, spwNum = len(antList), len(spwList)
 msmd.open(msfile)
 scanList = msmd.scansforintent("CALIBRATE_ATMOSPHERE*").tolist()
 timeOFF  = msmd.timesforintent("CALIBRATE_ATMOSPHERE#OFF_SOURCE")
-timeON   = msmd.timesforintent("CALIBRATE_PHASE#ON_SOURCE")
 timeList = [np.median(msmd.timesforscan(scan)) for scan in scanList]
 chavspwList = list((set(msmd.almaspws(chavg=True)) - set(msmd.almaspws(sqld=True))) & set(msmd.spwsforscan(scanList[0])))
 OnScanList  = list((set(msmd.scansforintent('*ON_SOURCE')) - set(msmd.scansforintent('*ATMOSPHERE*'))) & set(msmd.scansforspw(chavspwList[0])))

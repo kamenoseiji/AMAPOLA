@@ -202,6 +202,7 @@ def GetPHchavSPWs(msfile):
     msmd.open(msfile)
     phSPWs  = msmd.spwsforintent("CALIBRATE_PHASE*").tolist(); phSPWs.sort()
     if len(phSPWs) < 1: phSPWs = msmd.spwsforintent("CALIBRATE_BANDPASS*").tolist(); phSPWs.sort()
+    if len(phSPWs) < 1: phSPWs = msmd.spwsforintent("CALIBRATE_FLUX*").tolist(); phSPWs.sort()
     if len(phSPWs) < 1: phSPWs = msmd.spwsforintent("CALIBRATE_CHECK*").tolist(); phSPWs.sort()
     SPWnames= msmd.namesforspws(phSPWs)
     chavSPWList = [spw for spw_index, spw in enumerate(phSPWs) if 'CH_AVG' in SPWnames[spw_index] ]
