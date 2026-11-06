@@ -71,6 +71,7 @@ TsysDigitalCorrection = options.TsysDigital
 if options.XYsign != '': givenXYsign  = [np.sign(int(XY)) for XY in options.XYsign.split(',')]
 '''
 prefix = 'uid___A002_Xc3a8fe_X4b08.split.RB_03'
+#prefix = 'uid___A002_X1427fc8_X7625'
 antFlag = []
 uvLimit = 5000
 refant  = ''
@@ -281,23 +282,24 @@ for scan_index, scan in enumerate(BandScanList):
     bl_vis = np.mean(np.array(chAvgList), axis=0).T
     outLierVis = np.where(abs(bl_vis) > 10.0* np.percentile(abs(np.mean(bl_vis, axis=1)), 80))
     outLierBl = np.unique(outLierVis[0])
-    if len(outLierBl) < 0.5*blNum: 
+    #if len(outLierBl) < 0.5*blNum: 
+    if len(outLierBl) > 0.5*blNum: 
         flaggedAntList = list(set(sum([list(Bl2Ant(bl)) for bl in outLierBl], []))) 
         scanDic[scan]['scanAnt'] = list(set(range(scanGain.shape[0])) - set(flaggedAntList))
         unflaggedBlList = list(set(range(bl_vis.shape[0])) - set(outLierBl))
         unflaggedbl_vis = bl_vis[unflaggedBlList,:]
         outLierVis = np.where(abs(unflaggedbl_vis) > 10.0* np.percentile(abs(np.mean(unflaggedbl_vis, axis=1)), 80))
-    scanFlag = list(set(range(bl_vis.shape[1])) - set(np.unique(outLierVis[1]))); scanFlag.sort()
+    scanFlag= list(set(range(bl_vis.shape[1])) - set(np.unique(outLierVis[1]))); scanFlag.sort(); scanFlag.sort()
+    scanDic[scan]['scanFlag'] = scanFlag
     if len(scanFlag) > 1:
         scanGain[:,scanFlag] = np.apply_along_axis(gainComplex, 0, bl_vis[:,scanFlag])
         scanAnt = np.where(abs( np.log( np.mean(abs(scanGain[:,scanFlag]), axis=1) / np.median(abs(scanGain[:,scanFlag])))) < np.log(10))[0].tolist()
-    #-------- Store to scanDic
-    scanDic[scan]['scanFlag'] = scanFlag
-    scanDic[scan]['scanAnt']  = scanAnt
-    scanDic[scan]['Gain']   = scanGain
-    coh = abs(np.mean(scanGain[:,scanFlag], axis=1)) / np.mean(abs(scanGain[:,scanFlag]), axis=1)
-    for ant_index, ant in enumerate(antList[antMap]): text_sd = text_sd + ' %.2f' % (100.0* (1.0 - coh[ant_index]))
-    print(text_sd)
+        #-------- Store to scanDic
+        scanDic[scan]['scanAnt']  = scanAnt
+        scanDic[scan]['Gain']   = scanGain
+        coh = abs(np.mean(scanGain[:,scanFlag], axis=1)) / np.mean(abs(scanGain[:,scanFlag]), axis=1)
+        for ant_index, ant in enumerate(antList[antMap]): text_sd = text_sd + ' %.2f' % (100.0* (1.0 - coh[ant_index]))
+        print(text_sd)
 #-------- Scan-by-scan bandpass and XY delay with SNR
 BPavgScanList = []  # scans used in bandpass averaging
 text_sd = '-----Scan-by-scan BP     :'
