@@ -175,6 +175,7 @@ def plotXYP(pp, prefix, spwList, XYspec, XYdelay, bunchNum=1):
 def plotFL(pp, scanDic, SPWDic):
     Pcolor   = ['black', 'blue', 'red', 'green']
     for scan_index, scan in enumerate(scanDic.keys()):
+        if 'StokesVis' not in scanDic[scan].keys(): continue
         scanFlag = scanDic[scan]['scanFlag']
         if len(scanFlag) == 0: continue
         figFL, axes = plt.subplots(3, 4, figsize = (11, 8))
@@ -225,6 +226,7 @@ def plotResidualMap(pp, scanDic, SPWDic):
     NyquistRatio = 4    # oversampling in (u,v) space
     repFreq = np.mean([np.median(SPWDic['freq'][spw_index]) for spw_index, spw in enumerate( SPWDic['spw'] )])
     for scan in scanDic.keys():
+        if 'StokesVis' not in scanDic[scan].keys(): continue
         figIM, axes = plt.subplots(2, 2, figsize = (11, 8), sharex=True, sharey=True, gridspec_kw={'right':0.9})
         figIM.suptitle(scanDic[scan]['source'])
         figIM.text(0.45, 0.05, 'Relative RA [arcsec]')

@@ -78,9 +78,9 @@ refant  = ''
 BPscan  = 0
 QUMODEL = True
 TsysDigitalCorrection = False
-PLOTMAP = False
-PLOTFL = False
-PLOTQU = False
+PLOTMAP = True
+PLOTFL = True
+PLOTQU = True
 '''
 msfile = prefix + '.ms'
 tempAtm = GetTemp(msfile)
@@ -462,6 +462,15 @@ for scan_index, scan in enumerate(scanDic.keys()):
         if sourceName in FscaleDic.keys(): StokesVis *= (SSODic[sourceName][1][spw_index] / FscaleDic[sourceName]['model'][spw_index])
         #-------- Linear regression to determine zero-spacing visibilities
         ScanFlux[spw_index], ScanSlope[spw_index], ErrFlux[spw_index] = lmStokes(StokesVis[:,unShadowBL], uvDist[unShadowBL])
+        if -ScanFlux[spw_index][0] / ScanSlope[spw_index] < np.max(uvDist):    # Poor linear regression, try binned spline
+            StokesParam = np.array([
+                DCStokes(StokesVis[0,unShadowBL], uvDist[unShadowBL]),
+                DCStokes(StokesVis[1,unShadowBL], uvDist[unShadowBL]),
+                DCStokes(StokesVis[2,unShadowBL], uvDist[unShadowBL]),
+                DCStokes(StokesVis[3,unShadowBL], uvDist[unShadowBL])]) 
+            ScanFlux[spw_index] = StokesParam.real
+            ErrFlux[spw_index]  = StokesParam.imag
+            ScanSlope[spw_index] = 0.0
         for pol_index in list(range(4)):
             text_Stokes[spw_index] = text_Stokes[spw_index] + ' %7.4f (%.4f) ' % (ScanFlux[spw_index, pol_index], ErrFlux[spw_index, pol_index])
         text_Stokes[spw_index] = text_Stokes[spw_index] + '%6.3f   %6.1f ' % (100.0* np.sqrt(ScanFlux[spw_index, 1]**2 + ScanFlux[spw_index, 2]**2)/ScanFlux[spw_index, 0], np.arctan2(ScanFlux[spw_index, 2],ScanFlux[spw_index, 1])*90.0/np.pi)

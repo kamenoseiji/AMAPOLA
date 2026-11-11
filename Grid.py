@@ -347,6 +347,21 @@ def Vis2Stokes(VisChav, Dcat, PA):
         Stokes[:,bl_index] = PS.reshape(4, 4*PAnum).dot(Minv.dot( VisChav[:,bl_index]).reshape(4*PAnum)) / PAnum
     #
     return Stokes
+#-------- Estimate zero-baseline Stokes
+def DCStokes(complexVis, uvDist):
+    from scipy.interpolate import UnivariateSpline
+    from scipy.stats import binned_statistic
+    n_bins = max(5, int(np.sqrt( np.max(uvDist) / np.min(uvDist) )))
+    bin_medians, bin_edges, _ = binned_statistic(np.log(uvDist), complexVis.real, statistic="median", bins=n_bins)
+    bin_stds, _, _ = binned_statistic(np.log(uvDist), complexVis.imag, statistic="std", bins=n_bins)
+    bin_counts, _, _ = binned_statistic(np.log(uvDist), complexVis, statistic="count", bins=n_bins)
+    bin_edges = np.exp(bin_edges)
+    bin_centers = 0.5 * (bin_edges[:-1] + bin_edges[1:])
+    mask = (bin_counts > 3) & np.isfinite(bin_medians) & (bin_stds > 0)
+    # Weight spline by standard error of each bin
+    weights = np.sqrt(bin_counts[mask]) / bin_stds[mask]
+    SP = UnivariateSpline(bin_centers[mask], bin_medians[mask], w=weights, k=2)
+    return float(SP(0.0)) + (0.0 + 1.0j)/np.sqrt(np.sum(weights))
 #-------- Linear regression for visibility-baseline relation
 def lmStokes(StokesVis, uvDist):
     StokesFlux, StokesErr, blNum = np.zeros([4]), np.ones([4]), len(uvDist)
