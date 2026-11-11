@@ -59,7 +59,7 @@ for FS in FSUIDs:
                     print(text_sd[:-1])
                     os.system(text_sd[:-1])
                 #-------- Run AMAPOLA reduction for concatenated MS
-                text_sd = 'casa -c ' + SCR_DIR + 'checkGridSurvey.py -u %s' % (prefix)
+                text_sd = 'casa -c ' + SCR_DIR + 'checkGridSurvey.py -u %s -m' % (prefix)
                 print(text_sd)
                 os.system(text_sd)
                 #-------- Separate Flux.log

@@ -461,7 +461,11 @@ for scan_index, scan in enumerate(scanDic.keys()):
         if sourceName in FscaleDic.keys(): StokesVis *= (SSODic[sourceName][1][spw_index] / FscaleDic[sourceName]['model'][spw_index])
         #-------- Linear regression to determine zero-spacing visibilities
         ScanFlux[spw_index], ScanSlope[spw_index], ErrFlux[spw_index] = lmStokes(StokesVis[:,unShadowBL], uvDist[unShadowBL])
-        if ScanFlux[spw_index][0] / abs(ScanSlope[spw_index]) < np.max(uvDist[unShadowBL]):    # Poor linear regression, try binned spline
+        if ScanFlux[spw_index][0] < 7* ErrFlux[spw_index][0]:                                     # SNR low
+            ScanFlux[spw_index] = np.mean(StokesVis[:,unShadowBL], axis=1).real
+            ErrFlux[spw_index]  = np.std(StokesVis[:,unShadowBL].imag, axis=1) / np.sqrt(len(unShadowBL) - 1)
+            ScanSlope[spw_index] = 0.0
+        elif ScanFlux[spw_index][0] / abs(ScanSlope[spw_index]) < np.max(uvDist[unShadowBL]):    # Poor linear regression, try binned spline
             StokesParam = np.array([
                 DCStokes(StokesVis[0,unShadowBL], uvDist[unShadowBL]),
                 DCStokes(StokesVis[1,unShadowBL], uvDist[unShadowBL]),
