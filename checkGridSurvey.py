@@ -70,8 +70,7 @@ PLOTQU  = PLOTMAP
 TsysDigitalCorrection = options.TsysDigital
 if options.XYsign != '': givenXYsign  = [np.sign(int(XY)) for XY in options.XYsign.split(',')]
 '''
-prefix = 'uid___A002_Xc3a8fe_X4b08.split.RB_03'
-#prefix = 'uid___A002_X1427fc8_X7625'
+prefix = 'uid___A002_X141ca24_Xe32f'
 antFlag = []
 uvLimit = 5000
 refant  = ''
@@ -462,7 +461,7 @@ for scan_index, scan in enumerate(scanDic.keys()):
         if sourceName in FscaleDic.keys(): StokesVis *= (SSODic[sourceName][1][spw_index] / FscaleDic[sourceName]['model'][spw_index])
         #-------- Linear regression to determine zero-spacing visibilities
         ScanFlux[spw_index], ScanSlope[spw_index], ErrFlux[spw_index] = lmStokes(StokesVis[:,unShadowBL], uvDist[unShadowBL])
-        if -ScanFlux[spw_index][0] / ScanSlope[spw_index] < np.max(uvDist):    # Poor linear regression, try binned spline
+        if ScanFlux[spw_index][0] / abs(ScanSlope[spw_index]) < np.max(uvDist[unShadowBL]):    # Poor linear regression, try binned spline
             StokesParam = np.array([
                 DCStokes(StokesVis[0,unShadowBL], uvDist[unShadowBL]),
                 DCStokes(StokesVis[1,unShadowBL], uvDist[unShadowBL]),
