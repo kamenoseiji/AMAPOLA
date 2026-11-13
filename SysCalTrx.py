@@ -12,7 +12,7 @@ parser.add_option('-t', dest='PLOTTSYS', metavar='PLOTTSYS',
 prefix  = options.prefix.replace("/", "_").replace(":","_").replace(" ","")
 PLOTTSYS= options.PLOTTSYS
 '''
-prefix = 'uid___A002_Xc3a8fe_X4b08.split.RB_03'
+prefix = 'uid___A002_Xd051fd_Xe3'
 PLOTTSYS = True
 '''
 #-------- Read SYSCAL table
@@ -94,7 +94,8 @@ for bandName in np.unique(BandNames):
         np.save('%s-%s-SPW%d.Tsky.npy' % (prefix, bandName, spw), np.array(TskyList).transpose(1,2,0))
     #-------- Log Trx 
     atmTimeList, atmElList = [], []
-    for scan_index, scan in enumerate(scanList):
+    #for scan_index, scan in enumerate(scanList):
+    for scan_index, scan in enumerate(bandScanList):
         atmTimeList = atmTimeList + [TsysBandDic[scan]['mjdSec']]
         atmElList   = atmElList + [TsysBandDic[scan]['El']]
         timeLabel = 'Scan %d : %s EL=%.1f' % (scan, mjd2utc(TsysBandDic[scan]['mjdSec'])[:-4], RADDEG*TsysBandDic[scan]['El'])

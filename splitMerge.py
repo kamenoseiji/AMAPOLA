@@ -9,7 +9,7 @@ parser.add_option('-u', dest='prefixList', metavar='prefixList',
 (options, args) = parser.parse_args()
 prefixList = [prefix.replace("/", "_").replace(":","_") for prefix in options.prefixList.split(',')]
 '''
-prefixList = ['uid___A002_X1422790_X4c8e','uid___A002_X1422790_X4f73']
+prefixList = ['uid___A002_Xca0142_Xb7']
 '''
 prefixElement = prefixList[0].split('_X'); newPrefix = prefixElement[0] + '_X' + prefixElement[1]
 os.system('rm -rf %s.ms*' % (newPrefix))
@@ -37,9 +37,12 @@ for file_index, prefix in enumerate(prefixList):
         comvis = comvis + [splitMS]
 for band in bandList:
     comVisBand = [msFileName for msFileName in comvis if band in msFileName]
+    mergeMS = newPrefix + '.' + band + '.ms'
     if len(comVisBand) > 1:
-        mergeMS = newPrefix + '.' + band + '.ms'
         print('MERGE : ' + mergeMS)
         os.system('rm -rf %s' % (mergeMS))
         concat(vis=comVisBand, freqtol='1MHz', dirtol='0.1arcsec', concatvis= mergeMS)
         for msFileName in comVisBand: os.system('rm -rf %s' % (msFileName))
+    else:
+        print('MOVE : ' + mergeMS)
+        os.system('mv %s %s' % (comVisBand[0], mergeMS))
