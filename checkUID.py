@@ -67,9 +67,8 @@ for FS in FSUIDs:
             os.system('mv ./UID/UIDnew ./UID/UIDList')
             storeLog(EBList[0], bandList[0])
             os.system('casa -c ' + SCR_DIR + 'AMAPOLA2SC.py -u %s' % (EBList[0]))
-            continue
         #-------- For multi band, single EB
-        if len(bandList) > 1 and len(EBList) < 2:
+        elif len(bandList) > 1 and len(EBList) < 2:
             for bandName in bandList:
                 prefix = '%s.%s' % (newPrefix, bandName)
                 if not os.path.isdir(prefix + '.ms'):
@@ -82,32 +81,32 @@ for FS in FSUIDs:
             os.system(text_sd)
             os.system('mv ./UID/UIDnew ./UID/UIDList')
             os.system('casa -c ' + SCR_DIR + 'AMAPOLA2SC.py -u %s' % (EBList[0]))
-            continue
         #-------- For multiple EBs
-        for bandName in bandList:
-            prefix = '%s.%s' % (newPrefix, bandName)
-            EBindexList = [index for index,band in enumerate(bandEB) if bandName in band]
-            DTband, EBband = np.array(DT)[EBindexList], np.array(EBList)[EBindexList]
-            sort_index = np.argsort(DTband).tolist()
-            if not os.path.isdir(prefix + '.ms'):
-                #-------- Concatinate multiple EBs with the same array
-                text_sd = 'casa -c ' + SCR_DIR + 'splitMerge.py -u '
+        else:
+            for bandName in bandList:
+                prefix = '%s.%s' % (newPrefix, bandName)
+                EBindexList = [index for index,band in enumerate(bandEB) if bandName in band]
+                DTband, EBband = np.array(DT)[EBindexList], np.array(EBList)[EBindexList]
+                sort_index = np.argsort(DTband).tolist()
+                if not os.path.isdir(prefix + '.ms'):
+                    #-------- Concatinate multiple EBs with the same array
+                    text_sd = 'casa -c ' + SCR_DIR + 'splitMerge.py -u '
+                    for index in sort_index: text_sd = text_sd + EBband[index] + ','
+                    print(text_sd[:-1])
+                    os.system(text_sd[:-1])
+                #-------- Run AMAPOLA reduction for concatenated MS
+                execGridReduction(prefix)
+                #-------- Separate Flux.log
+                text_sd = 'casa -c ' + SCR_DIR + 'splitFluxLog.py -u '
                 for index in sort_index: text_sd = text_sd + EBband[index] + ','
                 print(text_sd[:-1])
                 os.system(text_sd[:-1])
-            #-------- Run AMAPOLA reduction for concatenated MS
-            execGridReduction(prefix)
-            #-------- Separate Flux.log
-            text_sd = 'casa -c ' + SCR_DIR + 'splitFluxLog.py -u '
-            for index in sort_index: text_sd = text_sd + EBband[index] + ','
-            print(text_sd[:-1])
-            os.system(text_sd[:-1])
-            for index in sort_index:storeLog(EBband[index], bandName)
-        for index in sort_index:
-            text_sd = replaceList(EBband[index], 'done')
-            os.system(text_sd)
-            os.system('mv ./UID/UIDnew ./UID/UIDList')
-            os.system('casa -c ' + SCR_DIR + 'AMAPOLA2SC.py -u %s' % (EBband[index]))
+                for index in sort_index:storeLog(EBband[index], bandName)
+            for index in sort_index:
+                text_sd = replaceList(EBband[index], 'done')
+                os.system(text_sd)
+                os.system('mv ./UID/UIDnew ./UID/UIDList')
+                os.system('casa -c ' + SCR_DIR + 'AMAPOLA2SC.py -u %s' % (EBband[index]))
         #os.system('rm -rf %s.ms*' % (prefix))
     os.system('mv *.log LOG/')
 #
