@@ -12,9 +12,10 @@ parser.add_option('-t', dest='PLOTTSYS', metavar='PLOTTSYS',
 prefix  = options.prefix.replace("/", "_").replace(":","_").replace(" ","")
 PLOTTSYS= options.PLOTTSYS
 '''
-prefix = 'uid___A002_Xd051fd_Xe3'
-PLOTTSYS = True
+prefix = 'uid___A002_X9e72b1_Xeb4'
+#prefix = 'uid___A002_X9e72b1_Xeb4.split.RB_03'
 '''
+PLOTTSYS = True
 #-------- Read SYSCAL table
 msfile = prefix + '.ms'
 tb.open(msfile + '/SYSCAL')
@@ -75,7 +76,7 @@ for scan_index, scan in enumerate(scanList):
         'Tsys'   : TSY[:,:,data_index],
         'Tsky'   : np.mean((TSY[:,:,data_index] - TRX[:,:,data_index])* tempAtm / (TSY[:,:,data_index] + tempAtm), axis=0)} 
 #-------- Save Trx and Tsky 
-for bandName in np.unique(BandNames):
+for bandName in UniqBands:
     logFile  = open('%s-%s-TelCal.log' % (prefix, bandName), 'w')
     bandScanList = [scan for scan in TsysDic.keys() if TsysDic[scan]['Band'] == bandName]
     TsysBandDic = {keyScan: dicValue for keyScan, dicValue in TsysDic.items() if keyScan in bandScanList}

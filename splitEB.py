@@ -8,12 +8,6 @@ parser.add_option('-u', dest='prefixList', metavar='prefixList',
     help='EB UID   e.g. uid___A002_X1399105_X40ca,uid___A002_X1399105_X414b,uid___A002_X1399105_X41c8', default='')
 (options, args) = parser.parse_args()
 prefixList = [prefix.replace("/", "_").replace(":","_") for prefix in options.prefixList.split(',')]
-'''
-prefixList = ['uid___A002_Xca0142_Xb7']
-'''
-prefixElement = prefixList[0].split('_X'); newPrefix = prefixElement[0] + '_X' + prefixElement[1]
-os.system('rm -rf %s.ms*' % (newPrefix))
-comvis = []
 for file_index, prefix in enumerate(prefixList):
     msfile = prefix + '.ms'
     if not os.path.isdir(msfile): importasdm(prefix)
@@ -34,15 +28,4 @@ for file_index, prefix in enumerate(prefixList):
         msmd.close()
         print('SPLIT : %s %s SPWs=%s' % (prefix, band, str(splitSPWs).strip('[]')))
         split(prefix+'.ms', outputvis=splitMS, spw=str(splitSPWs).strip('[]'),  datacolumn='DATA')
-        comvis = comvis + [splitMS]
-for band in bandList:
-    comVisBand = [msFileName for msFileName in comvis if band in msFileName]
-    mergeMS = newPrefix + '.' + band + '.ms'
-    if len(comVisBand) > 1:
-        print('MERGE : ' + mergeMS)
-        os.system('rm -rf %s' % (mergeMS))
-        concat(vis=comVisBand, freqtol='1MHz', dirtol='0.1arcsec', concatvis= mergeMS)
-        for msFileName in comVisBand: os.system('rm -rf %s' % (msFileName))
-    else:
-        print('MOVE : ' + mergeMS)
-        os.system('mv %s %s' % (comVisBand[0], mergeMS))
+#
