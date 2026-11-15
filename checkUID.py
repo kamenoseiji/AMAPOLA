@@ -82,11 +82,11 @@ for FS in FSUIDs:
             #-------- Single EB (no concatenate)
             if len(bandEBList) == 1:
                 execGridReduction(bandEBList[0])
-                text_sd = replaceList(EBList[0], 'done')
+                storeLog(bandEBList[0], bandName)
+                text_sd = replaceList(bandEBList[0], 'done')
                 os.system(text_sd)
                 os.system('mv ./UID/UIDnew ./UID/UIDList')
-                storeLog(EBList[0], bandName)
-                os.system('casa -c ' + SCR_DIR + 'AMAPOLA2SC.py -u %s' % (EBList[0]))
+                os.system('casa -c ' + SCR_DIR + 'AMAPOLA2SC.py -u %s' % (bandEBList[0]))
             #-------- Single EB (no concatenate)
             else:
                 for prefix in bandEBList:
@@ -96,22 +96,23 @@ for FS in FSUIDs:
                         os.system(text_sd)
                         EBdic[prefix + '.split.' + bandName] = EBdic.pop(prefix)
                 EBdic = dict(sorted(EBdic.items(), key=lambda item: item[1]['DT']))     # Sort by DT
-                bandEBList = [EB for EB in EBdic.keys() if bandName in EBdic[EB]['Band']]
+                splitBandEBList = [EB for EB in EBdic.keys() if bandName in EBdic[EB]['Band']]
                 text_sd = 'casa -c ' + SCR_DIR + 'mergeEB.py -u '
-                for prefix in bandEBList: text_sd = text_sd + prefix + ','
+                for prefix in splitBandEBList: text_sd = text_sd + prefix + ','
                 print(text_sd[:-1])
                 os.system(text_sd[:-1])
                 execGridReduction('%s.%s' % (newPrefix, bandName))
                 text_sd = 'casa -c ' + SCR_DIR + 'splitFluxLog.py -u '
                 for prefix in bandEBList: text_sd = text_sd + prefix.split('.')[0] + ','
-                os.system(text_sd[:-1])
                 print(text_sd[:-1])
-                for prefix in bandEBList:
+                os.system(text_sd[:-1])
+                for prefix in splitBandEBList:
                     storeLog(prefix.split('.')[0], bandName)
                     text_sd = replaceList(prefix.split('.')[0], 'done')
                     os.system(text_sd)
                     os.system('mv ./UID/UIDnew ./UID/UIDList')
                     os.system('casa -c ' + SCR_DIR + 'AMAPOLA2SC.py -u %s' % (prefix.split('.')[0]))
+            #
         #
         os.system('rm -rf *.ms*')
 #
