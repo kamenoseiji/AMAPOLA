@@ -78,6 +78,8 @@ for FS in FSUIDs:
                         'Band' : bandName,
                         'DT'   : EBdic[prefix]['DT']}
                 del EBdic[prefix]
+            else:
+                EBdic[prefix]['Band'] = EBdic[prefix]['Band'][0]        # unlist the band name 
         #-------- Classification by band
         bandList = np.unique(np.array([EBdic[prefix]['Band'] for prefix in EBdic.keys()])).tolist()
         for bandName in bandList:
