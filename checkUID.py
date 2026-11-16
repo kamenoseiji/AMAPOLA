@@ -14,13 +14,16 @@ def execGridReduction(prefix):
     return
 #
 def storeLog(prefix, bandName):
-    print('scp ' + prefix + '-' + bandName + '-Flux.log ' + URI_Ingest)
-    os.system('scp ' + prefix + '-' + bandName + '-Flux.log ' + URI_Ingest)
+    if 'split' in prefix:
+        os.system('mv ' + prefix + '-' + bandName + '-Flux.log ' + prefix.split('.split')[0] + '-' + bandName + '-Flux.log')
+        prefix = prefix.split('.split')[0]
     os.system('rm -rf casa*.log')
     os.system('mv *.npy NPY/')
     os.system('mv *.pdf PDF/')
     os.system('mv *.log LOG/')
     os.system('rm -rf *.cl')
+    print('scp LOG/' + prefix + '-' + bandName + '-Flux.log ' + URI_Ingest)
+    os.system('scp LOG/' + prefix + '-' + bandName + '-Flux.log ' + URI_Ingest)
     return
 #
 SCR_DIR = os.environ['HOME'] + '/AMAPOLA/'                                      # Script path
@@ -83,10 +86,12 @@ for FS in FSUIDs:
             if len(bandEBList) == 1:
                 execGridReduction(bandEBList[0])
                 storeLog(bandEBList[0], bandName)
-                text_sd = replaceList(bandEBList[0], 'done')
+                text_sd = replaceList(bandEBList[0].split('.split')[0], 'done')
                 os.system(text_sd)
                 os.system('mv ./UID/UIDnew ./UID/UIDList')
-                os.system('casa -c ' + SCR_DIR + 'AMAPOLA2SC.py -u %s' % (bandEBList[0]))
+                text_sd = 'casa -c ' + SCR_DIR + 'AMAPOLA2SC.py -u %s' % (bandEBList[0].split('.split')[0])
+                print(text_sd)
+                os.system(text_sd)
             #-------- Single EB (no concatenate)
             else:
                 for prefix in bandEBList:
@@ -111,7 +116,9 @@ for FS in FSUIDs:
                     text_sd = replaceList(prefix.split('.')[0], 'done')
                     os.system(text_sd)
                     os.system('mv ./UID/UIDnew ./UID/UIDList')
-                    os.system('casa -c ' + SCR_DIR + 'AMAPOLA2SC.py -u %s' % (prefix.split('.')[0]))
+                    text_sd = 'casa -c ' + SCR_DIR + 'AMAPOLA2SC.py -u %s' % (prefix.split('.')[0])
+                    print(text_sd)
+                    os.system(text_sd)
             #
         #
         os.system('rm -rf *.ms*')
