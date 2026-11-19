@@ -93,7 +93,7 @@ for FS in FSUIDs:
                 os.system('mv ./UID/UIDnew ./UID/UIDList')
                 text_sd = 'casa -c ' + SCR_DIR + 'AMAPOLA2SC.py -u %s' % (bandEBList[0].split('.split')[0])
                 print(text_sd)
-                os.system(text_sd)
+                #os.system(text_sd)
             #-------- Single EB (no concatenate)
             else:
                 for prefix in bandEBList:
@@ -120,7 +120,7 @@ for FS in FSUIDs:
                     os.system('mv ./UID/UIDnew ./UID/UIDList')
                     text_sd = 'casa -c ' + SCR_DIR + 'AMAPOLA2SC.py -u %s' % (prefix.split('.')[0])
                     print(text_sd)
-                    os.system(text_sd)
+                    #os.system(text_sd)
             #
         #
         os.system('rm -rf *.ms*')
