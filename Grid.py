@@ -290,9 +290,9 @@ def SSOAe(antList, spwDic, uvw, scanDic, SSODic, XSList):
         for ant_index, SA in enumerate(SAant):
             Ae[SA] = Aeff[:, ant_index]
             Wg[SA] = np.sign(Aeff[:, ant_index])* np.median(abs(SSOmodelVis))
-        if np.median(Ae) > 0.99 : Wg *= 1.0e-6
-        if np.median(Ae) < 0.19 : Wg *= 1.0e-2
-        if np.median(scanDic['EL']) < ELshadow : Wg *= 0.01
+        if np.median(Ae) > 0.90 : Wg *= (1.0e-3/antNum)
+        if np.median(Ae) < 0.30 : Wg *= (1.0e-3/antNum)
+        if np.median(scanDic['EL']) < ELshadow : Wg *= np.cos(4*(ELshadow - np.median(scanDic['EL'])))
         AeSPW = AeSPW + [Ae]
         WgSPW = WgSPW + [Wg]
         SSOmodel = SSOmodel + [SSOmodelVis]

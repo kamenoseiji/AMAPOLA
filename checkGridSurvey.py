@@ -70,12 +70,13 @@ PLOTQU  = PLOTMAP
 TsysDigitalCorrection = options.TsysDigital
 if options.XYsign != '': givenXYsign  = [np.sign(int(XY)) for XY in options.XYsign.split(',')]
 '''
-prefix = 'uid___A002_X1430c9d_X1e02c'
+prefix = 'uid___A002_X600c89_X57'
 antFlag = []
 uvLimit = 5000
 refant  = ''
 BPscan  = 0
 QUMODEL = True
+Apriori = True
 TsysDigitalCorrection = False
 PLOTMAP = True
 PLOTFL = True
