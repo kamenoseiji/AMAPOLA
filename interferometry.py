@@ -225,6 +225,7 @@ def GetSPWFreq(msfile, SPWdic):         # Frequency setups in SPWs
         BWList = BWList + [chNum* np.median(chWid)]
         FreqList = FreqList + [freq]
     SPWdic['freq']  = FreqList
+    SPWdic['centerfreq']  = [np.mean(FreqList[spw_index][chRangeList[spw_index]]) for spw_index,spw in enumerate(SPWdic['spw'])]
     SPWdic['chNum'] = chNumList
     SPWdic['chRange'] = chRangeList
     SPWdic['BW']    = BWList

@@ -76,7 +76,7 @@ uvLimit = 5000
 refant  = ''
 BPscan  = 0
 QUMODEL = True
-Apriori = True
+Apriori = False
 TsysDigitalCorrection = False
 PLOTMAP = True
 PLOTFL = True
@@ -410,8 +410,8 @@ SSOList = list(FscaleDic.keys())
 for SSO in SSOList:
     if (FscaleDic[SSO] == []) or (FscaleDic[SSO] == None): del FscaleDic[SSO]
 #-------- WgSum : to judge SSO flux calibration or a priori (SEFD)
-WgSum = np.sum( [np.median(np.array(FscaleDic[SSO]['Wg'])) for SSO in FscaleDic.keys()] )
-Aeff =  averageAe(FscaleDic, BandbpSPW['spw']) if WgSum > 0.01 else np.array([etaA[:,antMap] for spw in BandbpSPW['spw']]).transpose(2,1,0)
+WgMax = np.max( [np.percentile(np.array(FscaleDic[SSO]['Wg']), 25) for SSO in FscaleDic.keys()] )
+Aeff =  averageAe(FscaleDic, BandbpSPW['spw']) if WgMax > 0.1 else np.array([etaA[:,antMap] for spw in BandbpSPW['spw']]).transpose(2,1,0)
 text_sd = ' Aeff: '
 for spw_index, spw in enumerate(BandbpSPW['spw']): text_sd = text_sd + 'SPW%02d-X SPW%02d-Y ' % (spw, spw)
 fluxCalText = ''
@@ -440,19 +440,23 @@ text_Stokes = np.repeat('',len(BandbpSPW['spw'])).tolist()
 #-------- Store Stokes parameters into scanDic
 for scan_index, scan in enumerate(scanDic.keys()):
     scanFlag  = scanDic[scan]['scanFlag']
+    if len(scanFlag) == 0: continue
+    uvMax = uvLimit
     flagAnt = np.ones(useAntNum)
     shadowAnts = indexList(scanDic[scan]['Shadow'], antList[antMap])
     flagAnt[shadowAnts] *= 0.1
     flagBL = flagAnt[ANT0[0:useBlNum]]* flagAnt[ANT1[0:useBlNum]]
-    unShadowBL = [bl for bl in list(range(len(flagBL))) if flagBL[bl] > 0.5]
     uvw = np.mean(scanDic[scan]['UVW'], axis=2); uvDist = np.sqrt(uvw[0]**2 + uvw[1]**2)
-    if len(scanFlag) == 0: continue
     sourceName = scanDic[scan]['source']
     text_src  = ' %02d %010s EL=%4.1f deg' % (scan, sourceName, 180.0* np.median(scanDic[scan]['EL'])/np.pi)
     timeLabel = qa.time('%fs' % np.median(scanDic[scan]['mjdSec']), form='ymd')[0] + ' SA=%.1f' % (scanDic[scan]['SA']) + ' deg.'
     StokesVisList, visChavList = [], []
     ScanFlux, ErrFlux, ScanSlope = np.zeros([len(BandbpSPW['spw']), 4]), np.zeros([len(BandbpSPW['spw']), 4]), np.zeros(len(BandbpSPW['spw']))
     for spw_index, spw in enumerate(BandbpSPW['spw']):
+        #---- baseline flagging by shadowing and uvMax
+        if sourceName in FscaleDic.keys(): uvMax = min(uvLimit, FscaleDic[scanDic[scan]['source']]['uvMax'][spw_index])
+        uvWeight = flagBL* np.exp(-0.4* uvDist / uvMax)
+        unShadowBL = [bl for bl in list(range(len(flagBL))) if uvWeight[bl] > 0.5]
         text_Stokes[spw_index] = ' SPW%02d %5.1f GHz ' % (spw, 1.0e-9* np.median(BandbpSPW['freq'][spw_index]))
         visChav = GainScale(Aeff[:,:,spw_index], antDia[antMap], np.mean(XspecList[spw_index][scan_index][:,chRange], axis=1))
         visChavList = visChavList + [visChav]
@@ -461,7 +465,7 @@ for scan_index, scan in enumerate(scanDic.keys()):
         #-------- SSO visibility to correct by model
         if sourceName in FscaleDic.keys(): StokesVis *= (SSODic[sourceName][1][spw_index] / FscaleDic[sourceName]['model'][spw_index])
         #-------- Linear regression to determine zero-spacing visibilities
-        ScanFlux[spw_index], ScanSlope[spw_index], ErrFlux[spw_index] = lmStokes(StokesVis[:,unShadowBL], uvDist[unShadowBL])
+        ScanFlux[spw_index], ScanSlope[spw_index], ErrFlux[spw_index] = lmStokes(StokesVis[:,unShadowBL], uvDist[unShadowBL], uvMax)
         if ScanFlux[spw_index][0] < 7* ErrFlux[spw_index][0]:                                     # SNR low
             ScanFlux[spw_index] = np.mean(StokesVis[:,unShadowBL], axis=1).real
             ErrFlux[spw_index]  = np.std(StokesVis[:,unShadowBL].imag, axis=1) / np.sqrt(len(unShadowBL) - 1)

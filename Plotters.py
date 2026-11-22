@@ -189,17 +189,17 @@ def plotFL(pp, scanDic, SPWDic):
         uvMin, uvMax, IMax = min(uvDist), max(uvDist), np.max(scanDic[scan]['ScanFlux'][:,0])
         axes[0,0].text(0.0, 1.15*180, text_src)
         axes[0,3].text(0.0, 1.15*180, timeLabel)
-        blFlag = scanDic[scan]['blFlag']
+        blFlag = scanDic[scan]['blFlag']; luvMax = max(uvDist[blFlag])
         for spw_index, spw in enumerate(SPWDic['spw']):
             StokesVis = scanDic[scan]['StokesVis'][spw_index]
             ScanFlux = scanDic[scan]['ScanFlux'][spw_index]
             ScanSlope = scanDic[scan]['uvSlope'][spw_index]* ScanFlux / ScanFlux[0]
             #-------- Plot Stokes visibilities
             axes[0,spw_index].plot( np.array([0.0, uvMax]), np.array([0.0, 0.0]), '-', color='grey')        # phase-0 line
-            axes[1,spw_index].plot( np.array([0.0, uvMax]), np.array([ScanFlux[0], ScanFlux[0] + uvMax* ScanSlope[0]]), '-', color=Pcolor[0])    # Stokes I fitline
-            axes[2,spw_index].plot( np.array([0.0, uvMax]), np.array([ScanFlux[1], ScanFlux[1] + uvMax* ScanSlope[1]]), '-', color=Pcolor[1])    # Stokes Q fitline
-            axes[2,spw_index].plot( np.array([0.0, uvMax]), np.array([ScanFlux[2], ScanFlux[2] + uvMax* ScanSlope[2]]), '-', color=Pcolor[2])    # Stokes U fitline
-            axes[2,spw_index].plot( np.array([0.0, uvMax]), np.array([ScanFlux[3], ScanFlux[3] + uvMax* ScanSlope[3]]), '-', color=Pcolor[3])    # Stokes V fitline
+            axes[1,spw_index].plot( np.array([0.0, luvMax]), np.array([ScanFlux[0], ScanFlux[0] + luvMax* ScanSlope[0]]), '-', color=Pcolor[0])    # Stokes I fitline
+            axes[2,spw_index].plot( np.array([0.0, luvMax]), np.array([ScanFlux[1], ScanFlux[1] + luvMax* ScanSlope[1]]), '-', color=Pcolor[1])    # Stokes Q fitline
+            axes[2,spw_index].plot( np.array([0.0, luvMax]), np.array([ScanFlux[2], ScanFlux[2] + luvMax* ScanSlope[2]]), '-', color=Pcolor[2])    # Stokes U fitline
+            axes[2,spw_index].plot( np.array([0.0, luvMax]), np.array([ScanFlux[3], ScanFlux[3] + luvMax* ScanSlope[3]]), '-', color=Pcolor[3])    # Stokes V fitline
             #
             axes[0,spw_index].plot( uvDist[blFlag], 180.0* np.angle(StokesVis[0][blFlag])/ np.pi, '.', label=StokesComponents[0], color=Pcolor[0])  # Plot visibility phase
             axes[1,spw_index].plot( uvDist[blFlag], StokesVis[0][blFlag].real, '.', label=StokesComponents[0], color=Pcolor[0])     # Plot Stokes I

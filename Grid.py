@@ -22,6 +22,7 @@ TauLimit = [0.0,  0.1, 0.1, 0.2, 0.2, 0.25, 0.5, 0.5, 0.5, 0.5, 0.6]
 sourceDic = {
 'J0006-063':'J0006-0623',
 '0006-063':'J0006-0623',
+'J0238+166':'J0238+1636',
 'J0237+288':'J0237+2848',
 'NGC_1052': 'J0241-0815',
 '3c84':'J0319+4130',
@@ -256,11 +257,8 @@ def SSOAe(antList, spwDic, uvw, scanDic, SSODic, XSList):
     ant0, ant1 = ANT0[0:blNum], ANT1[0:blNum]
     #-------- Check usable antenna/baselines
     uvFlag = np.ones(blNum)
-    for spw_index, spw in enumerate(spwDic['spw']):
-        chRange = spwDic['chRange'][spw_index]
-        centerFreq = np.mean(spwDic['freq'][spw_index][chRange])
-        uvFlag[np.where( uvDist > UVlimit* 299792458 / centerFreq)[0].tolist()] *= 0.0
-    #
+    uvMax = [UVlimit* 299792458 / spwDic['centerfreq'][spw_index] for spw_index, spw in enumerate(spwDic['spw'])]
+    for spw_index, spw in enumerate(spwDic['spw']): uvFlag[np.where(uvDist > uvMax[spw_index])[0].tolist()] *= 0.0
     SAant = [0] + [Bl2Ant(bl_index)[0] for bl_index in np.where(uvFlag > 0.1)[0].tolist() if Bl2Ant(bl_index)[1] == 0]
     SAbl  = [bl_index for bl_index in list(range(blNum)) if Bl2Ant(bl_index)[0] in SAant and Bl2Ant(bl_index)[1] in SAant]
     if len(SAant) < 4: return #  Too few antennas
@@ -280,10 +278,10 @@ def SSOAe(antList, spwDic, uvw, scanDic, SSODic, XSList):
     AeSPW, WgSPW, SSOmodel = [], [], []
     #-------- Aperture Efficiency
     for spw_index, spw in enumerate(spwDic['spw']):
-        uvWave = uvw[0:2,:] * centerFreq / 299792458    # UV distance in wavelength
-        primaryBeam = 1.13* 299792458 / (np.pi * antDia* centerFreq)
+        uvWave = uvw[0:2,:] * spwDic['centerfreq'][spw_index] / 299792458    # UV distance in wavelength
+        primaryBeam = 1.13* 299792458 / (np.pi * antDia* spwDic['centerfreq'][spw_index])
         SSOmodelVis = SSODic[SSOname][1][spw_index]*  diskVisBeam(SSODic[SSOname][2], uvWave[0], uvWave[1], primaryBeam[ant0]* primaryBeam[ant0]* np.sqrt(2.0 / (primaryBeam[ant0]**2 + primaryBeam[ant1]**2))) + 1.0e-9
-        VisChav = np.mean(XSList[spw_index][:,chRange][:,:,SAbl], axis=(1,3)) / SSOmodelVis[SAbl]
+        VisChav = np.mean(XSList[spw_index][:,spwDic['chRange'][spw_index]][:,:,SAbl], axis=(1,3)) / SSOmodelVis[SAbl]
         Gain = np.apply_along_axis(gainComplex, 1, VisChav)  # Gain[pol, ant]
         Aeff = 8.0* kb* abs(Gain)**2 / (np.pi* antDia[SAant]**2)
         Ae, Wg = np.zeros([antNum, 2]), np.zeros([antNum, 2])
@@ -299,7 +297,8 @@ def SSOAe(antList, spwDic, uvw, scanDic, SSODic, XSList):
     FscaleDic = {
         'Ae'    : AeSPW,
         'Wg'    : WgSPW,
-        'model' : SSOmodel}
+        'model' : SSOmodel,
+        'uvMax' : uvMax}
     return FscaleDic
 #-------- Average Ae among multiple SSOs
 def averageAe(FscaleDic, spwList):
@@ -363,19 +362,16 @@ def DCStokes(complexVis, uvDist):
     SP = UnivariateSpline(bin_centers[mask], bin_medians[mask], w=weights, k=2)
     return float(SP(0.0)) + (0.0 + 1.0j)/np.sqrt(np.sum(weights))
 #-------- Linear regression for visibility-baseline relation
-def lmStokes(StokesVis, uvDist):
+def lmStokes(StokesVis, uvDist, uvMax=5000):
     StokesFlux, StokesErr, blNum = np.zeros([4]), np.ones([4]), len(uvDist)
     #-------- 1st look
-    #tmpWeight = np.ones(blNum) / np.std(StokesVis[0].imag)
-    tmpWeight = np.exp(-uvDist/max(uvDist)) / np.std(StokesVis[0].imag)
+    tmpWeight = np.exp(-uvDist/uvMax) / np.std(StokesVis[0].imag)
     tmpWeight[np.where(abs(StokesVis[0]) < np.median(abs(StokesVis[0])))[0].tolist()] *= 0.5
     tmpWeight[np.where(abs(StokesVis[0]) < np.percentile(abs(StokesVis[0]), 25))[0].tolist()] *= 0.5
     coef, cov = np.polyfit(uvDist, abs(StokesVis[0]), deg=1, w=tmpWeight, cov=True) # small weights for short baselines (shadowed?)
     residVis = abs(StokesVis[0]) - np.polyval(coef, uvDist)
     #-------- 2nd look
     tmpWeight = np.ones(blNum) / np.std(StokesVis[0].imag)
-    #tmpWeight[np.where(abs(residVis) > 3.0*np.sqrt(cov[1,1]))[0].tolist()] *= 0.5
-    #tmpWeight[np.where(abs(residVis) > 5.0*np.sqrt(cov[1,1]))[0].tolist()] *= 0.5
     tmpWeight[np.where(abs(residVis) > 10.0*np.sqrt(cov[1,1]))[0].tolist()] *= 0.1
     coef, cov = np.polyfit(uvDist, abs(StokesVis[0]), deg=1, w=tmpWeight, cov=True); coef_err = np.sqrt(np.diag(cov))
     if abs(coef[0]) < 3.0* coef_err[0] and coef[0]*np.max(uvDist) < -0.75*coef[1]: coef[0], coef[1] = 0.0, np.median(abs(StokesVis[0]))

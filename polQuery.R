@@ -3,7 +3,7 @@ eval(parse(text = getURL("https://raw.githubusercontent.com/kamenoseiji/ALMAR/re
 #source('~/ALMAR/StatStokes.R')
 timeWindow <- 30
 Arguments <- commandArgs(trailingOnly = T)
-#Arguments <- c('-D2026/08/26/07:55:56', '-F97.500000', 'J0423-0120', 'J0106-4034', 'J0210-5101', 'J0348-2749', 'J0217+0144', 'J0108+0135', 'J2258-2758', 'J0309-6058', 'J0238+1636', 'J2348-1631', 'J2223-3137', 'J0450-8101', 'J0522-3627', 'J0237+2848', 'J2232+1143')
+#Arguments <- c('-D2013/10/20/04:40:21', '-F97.500000', 'Uranus', 'J2258-2758', 'J2357-5311', 'J0319+4130', 'J0423-0120', 'J0237+2848', 'J0238+166', 'J0334-4008', 'J0635-7516')
 #-------- Parse arguments
 parseArg <- function( args ){
 	srcNum <- argNum <- length(args)
