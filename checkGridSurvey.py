@@ -70,13 +70,13 @@ PLOTQU  = PLOTMAP
 TsysDigitalCorrection = options.TsysDigital
 if options.XYsign != '': givenXYsign  = [np.sign(int(XY)) for XY in options.XYsign.split(',')]
 '''
-prefix = 'uid___A002_X600c89_X57'
+prefix = 'uid___A002_X6998f8_Xf40'
 antFlag = []
 uvLimit = 5000
 refant  = ''
 BPscan  = 0
 QUMODEL = True
-Apriori = False
+Apriori = True
 TsysDigitalCorrection = False
 PLOTMAP = True
 PLOTFL = True
@@ -398,6 +398,7 @@ for scan_index, scan in enumerate(BandScanList):
         Xspec = XspecList[spw_index][scan_index][:,:,:,scanFlag]* (scanPhase[ant1]* scanPhase[ant0].conjugate())
         XspecList[spw_index][scan_index] = (Xspec.transpose(3, 0, 1, 2) / (BP_ant[polYindex][:,:,ant0]* BP_ant[polXindex][:,:,ant1].conjugate())).transpose(1,2,3,0)
 #-------- Aperture Efficiencies Determination using Solar System Objects
+#a=1/0
 if 'Apriori' not in locals(): Apriori = False
 if not Apriori:
     for scan_index, scan in enumerate(BandScanList):
@@ -410,7 +411,7 @@ SSOList = list(FscaleDic.keys())
 for SSO in SSOList:
     if (FscaleDic[SSO] == []) or (FscaleDic[SSO] == None): del FscaleDic[SSO]
 #-------- WgSum : to judge SSO flux calibration or a priori (SEFD)
-WgMax = np.max( [np.percentile(np.array(FscaleDic[SSO]['Wg']), 25) for SSO in FscaleDic.keys()] )
+WgMax = 0.0 if len(FscaleDic) < 1 else np.max( [np.percentile(np.array(FscaleDic[SSO]['Wg']), 25) for SSO in FscaleDic.keys()] )
 Aeff =  averageAe(FscaleDic, BandbpSPW['spw']) if WgMax > 0.1 else np.array([etaA[:,antMap] for spw in BandbpSPW['spw']]).transpose(2,1,0)
 text_sd = ' Aeff: '
 for spw_index, spw in enumerate(BandbpSPW['spw']): text_sd = text_sd + 'SPW%02d-X SPW%02d-Y ' % (spw, spw)

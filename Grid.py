@@ -261,7 +261,11 @@ def SSOAe(antList, spwDic, uvw, scanDic, SSODic, XSList):
     for spw_index, spw in enumerate(spwDic['spw']): uvFlag[np.where(uvDist > uvMax[spw_index])[0].tolist()] *= 0.0
     SAant = [0] + [Bl2Ant(bl_index)[0] for bl_index in np.where(uvFlag > 0.1)[0].tolist() if Bl2Ant(bl_index)[1] == 0]
     SAbl  = [bl_index for bl_index in list(range(blNum)) if Bl2Ant(bl_index)[0] in SAant and Bl2Ant(bl_index)[1] in SAant]
-    if len(SAant) < 4: return #  Too few antennas
+    if len(SAant) < 4:
+        return {
+            'Wg'    : [0.0 for spw in spwDic['spw']], 
+            'model' : [SSODic[SSOname][1][spw_index]* diskVisBeam(SSODic[SSOname][2], uvw[0]*spwDic['centerfreq'][spw_index] / 299792458, uvw[1]*spwDic['centerfreq'][spw_index] / 299792458, 1.0) for spw_index, spw in enumerate(spwDic['spw'])],
+            'uvMax' : uvMax}
     #-------- Baseline map
     print('Subarray : ',); print(antList[SAant])
     for ant_index in list(range(1, antNum)):
