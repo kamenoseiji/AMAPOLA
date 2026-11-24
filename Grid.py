@@ -285,6 +285,8 @@ def SSOAe(antList, spwDic, uvw, scanDic, SSODic, XSList):
         uvWave = uvw[0:2,:] * spwDic['centerfreq'][spw_index] / 299792458    # UV distance in wavelength
         primaryBeam = 1.13* 299792458 / (np.pi * antDia* spwDic['centerfreq'][spw_index])
         SSOmodelVis = SSODic[SSOname][1][spw_index]*  diskVisBeam(SSODic[SSOname][2], uvWave[0], uvWave[1], primaryBeam[ant0]* primaryBeam[ant0]* np.sqrt(2.0 / (primaryBeam[ant0]**2 + primaryBeam[ant1]**2))) + 1.0e-9
+        #VisChav = np.mean(XSList[spw_index][:,spwDic['chRange'][spw_index]][:,:,SAbl], axis=1).transpose(0,2,1) / SSOmodelVis[SAbl]
+        #Gain = np.mean(abs(np.apply_along_axis(gainComplex, 2, VisChav)), axis=1)  # Gain[pol, ant]
         VisChav = np.mean(XSList[spw_index][:,spwDic['chRange'][spw_index]][:,:,SAbl], axis=(1,3)) / SSOmodelVis[SAbl]
         Gain = np.apply_along_axis(gainComplex, 1, VisChav)  # Gain[pol, ant]
         Aeff = 8.0* kb* abs(Gain)**2 / (np.pi* antDia[SAant]**2)
@@ -293,17 +295,17 @@ def SSOAe(antList, spwDic, uvw, scanDic, SSODic, XSList):
             Ae[SA] = Aeff[:, ant_index]
             Wg[SA] = np.sign(Aeff[:, ant_index])* np.median(abs(SSOmodelVis))
         if np.median(Ae) > 0.90 : Wg *= (1.0e-3/antNum)
-        if np.median(Ae) < 0.30 : Wg *= (1.0e-3/antNum)
+        if np.median(Ae) < 0.40 : Wg *= (1.0e-2/antNum)
+        if np.median(Ae) < 0.30 : Wg *= (1.0e-2/antNum)
         if np.median(scanDic['EL']) < ELshadow : Wg *= np.cos(4*(ELshadow - np.median(scanDic['EL'])))
         AeSPW = AeSPW + [Ae]
         WgSPW = WgSPW + [Wg]
         SSOmodel = SSOmodel + [SSOmodelVis]
-    FscaleDic = {
+    return {
         'Ae'    : AeSPW,
         'Wg'    : WgSPW,
         'model' : SSOmodel,
         'uvMax' : uvMax}
-    return FscaleDic
 #-------- Average Ae among multiple SSOs
 def averageAe(FscaleDic, spwList):
     AeList, WgList = [], []
