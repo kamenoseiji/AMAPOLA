@@ -70,7 +70,7 @@ PLOTQU  = PLOTMAP
 TsysDigitalCorrection = options.TsysDigital
 if options.XYsign != '': givenXYsign  = [np.sign(int(XY)) for XY in options.XYsign.split(',')]
 '''
-prefix = 'uid___A002_X5d12f4_X6cc'
+prefix = 'uid___A002_Xb83979_X1565.split.RB_03'
 antFlag = []
 uvLimit = 5000
 refant  = ''
@@ -143,7 +143,7 @@ timeStampList, XspecList = loadScanSPW(msfile, chavSPWs, [checkScan])  # XspecLi
 #---- Check Allan Variance of channel-averaged visibilities in all baselines in the check scan
 for spw_index, spw in enumerate(chavSPWs):
     Trx = np.load('%s-%s-SPW%d.Trx.npy'  % (prefix, BandName, BandatmSPW['spw'][spw_index]))
-    antFlag = antFlag + antList[np.where(np.min(np.median(Trx, axis=(1,3)), axis=0) < 5)[0].tolist()].tolist()  # flag unrealistic Trx out
+    antFlag = antFlag + antList[np.where(np.min(np.percentile(np.median(Trx, axis=1), 10, axis=2), axis=0) < 5)[0].tolist()].tolist()  # flag unrealistic Trx out
     antFlag = antFlag + antList[np.where(np.max(np.median(Trx, axis=(1,3)), axis=0) > 2.0* np.median(Trx))[0].tolist()].tolist()  # flag unrealistic Trx out
     checkVis = XspecList[spw_index][0][[0,-1]][:,0]
     AV_bl = np.array([np.apply_along_axis(AV, 1, checkVis[0]), np.apply_along_axis(AV, 1, checkVis[1])])
